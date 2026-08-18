@@ -1,0 +1,177 @@
+/* 
+  index.css - Stylesheet for the Student React Project
+  
+  This file uses standard, straightforward CSS properties that are easy for 
+  beginners to understand. We use standard colors, simple flexbox, and basic 
+  border styles.
+*/
+
+/* 1. Global Reset & Body Styling */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121824; /* Dark blue-grey background */
+  color: #f1f5f9; /* Light text color for readability */
+}
+
+/* 2. Basic Sticky Navigation Bar */
+.navbar {
+  background-color: #1e293b; /* Solid dark background */
+  border-bottom: 2px solid #334155; /* Simple border separator */
+  padding: 15px 30px;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #3b82f6; /* Classic blue brand color */
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  margin-left: 20px;
+}
+
+.navbar-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: #ffffff; /* Turns white on hover or active */
+  text-decoration: underline; /* Simple text decoration for feedback */
+}
+
+/* 3. Main Container Layout */
+main {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+h1 {
+  font-size: 32px;
+  color: #3b82f6;
+}
+
+.subtitle {
+  color: #94a3b8;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.code-tag {
+  background-color: #1e293b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.section-title {
+  margin-top: 40px;
+  font-size: 22px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 5px;
+}
+
+/* 4. Telemetry Card Grid System (Using Flexbox or Simple Grid) */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Telemetry Cards */
+.card {
+  background-color: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.card:hover {
+  border-color: #3b82f6; /* Card border changes to blue on hover */
+}
+
+.card-title {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.card-value {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.card-subtext {
+  font-size: 12px;
+  color: #4ade80; /* Light green subtext for success statuses */
+  margin-top: 5px;
+}
+
+/* 5. Standard Interactive Buttons */
+.toggle-btn, .refresh-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.toggle-btn:hover, .refresh-button:hover {
+  background-color: #2563eb;
+}
+
+/* 6. Form Styling */
+form {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 450px;
+  margin: 20px auto;
+  text-align: left;
+}
+
+form h2 {
+  margin-top: 0;
+  font-size: 22px;
+  color: #ffffff;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  background-color: #0f172a;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  color: white;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
