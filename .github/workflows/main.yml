@@ -29,5 +29,5 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build # CRA outputs the build to the 'build' folder
+          folder: dist # CRA outputs the build to the 'build' folder
           branch: comments
