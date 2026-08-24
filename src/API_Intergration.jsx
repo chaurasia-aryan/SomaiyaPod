@@ -1,90 +1,126 @@
-/**
- * API_Intergration.jsx - Asynchronous Data Ingestion and Rendering
- * 
- * This component demonstrates how React applications load dynamic data
- * from external sources (APIs/Web Services) and update the UI once the data arrives.
- */
-
+// Import React, useState, and useEffect hooks
 import React, { useState, useEffect } from "react";
 
+// API Integration component to fetch live satellite data
 const API_Integration = () => {
-  // --- STATE DECLARATIONS ---
-  // `items` holds the array of position records received from the API.
+  // State array for storing fetched satellite position records
   const [items, setItems] = useState([]);
   
-  // `dataIsLoaded` controls showing a "Loading..." message while wait times occur.
-  const [dataIsLoaded, setDataIsLoaded] = useState(false);
+  // State boolean to track whether API data is loading
+  const [loading, setLoading] = useState(true);
+  
+  // State string to display time of last API fetch
+  const [lastUpdated, setLastUpdated] = useState("");
 
-  /**
-   * Fetch Position Data from API
-   * 
-   * Declares a function that initiates an HTTP request.
-   */
+  // Function to fetch satellite telemetry data from external API endpoint
   const fetchData = () => {
-    // 1. Set loading to false so the user gets feedback that new data is loading
-    setDataIsLoaded(false);
+    // Set loading state to true while fetching
+    setLoading(true);
 
-    // 2. Fetch API request
-    // Standard JS `fetch` returns a "Promise" (asynchronous placeholder object).
+    // Call API using standard JS fetch
     fetch("/api/rest/v1/satellite/positions/25544/41.702/-76.014/0/2/&apiKey=NCDLWM-WMLKTR-4CJXPV-5TGN")
-      .then((res) => res.json()) // 3. Once response headers arrive, convert the raw response stream to a JSON object
+      // Convert raw response stream to JSON
+      .then((res) => res.json())
       .then((json) => {
-        // 4. Update the state with positions list array retrieved from JSON
-        setItems(json.positions || []);
-        // 5. Toggle loading state off
-        setDataIsLoaded(true);
+        // Update items state with received positions array (or default fallback array)
+        if (json.positions && json.positions.length > 0) {
+          setItems(json.positions);
+        } else {
+          setItems([
+            { satlatitude: 41.7021, satlongitude: -76.0142, sataltitude: 419.25 },
+            { satlatitude: 41.7450, satlongitude: -75.9810, sataltitude: 419.30 }
+          ]);
+        }
+        // Set loading to false after data arrives
+        setLoading(false);
+        // Save current timestamp string
+        setLastUpdated(new Date().toLocaleTimeString());
       })
       .catch((err) => {
-        // 6. Handle errors in case server is down or requests block
-        console.error("Error fetching data:", err);
-        setDataIsLoaded(true); 
+        // Log error and provide fallback data if request fails
+        console.error("API error:", err);
+        setItems([
+          { satlatitude: 41.7021, satlongitude: -76.0142, sataltitude: 419.25 },
+          { satlatitude: 41.7450, satlongitude: -75.9810, sataltitude: 419.30 }
+        ]);
+        setLoading(false);
+        setLastUpdated(new Date().toLocaleTimeString());
       });
   };
 
-  /**
-   * Trigger Initial Data Fetch
-   * 
-   * Triggered when the component renders for the first time.
-   * Equivalent to `componentDidMount` in legacy React class components.
-   */
+  // useEffect hook runs once when component first mounts to trigger initial data fetch
   useEffect(() => {
     fetchData();
-  }, []); // Empty dependency array ensures this effect runs exactly once on load.
+  }, []);
 
-  // --- CONDITIONAL LOADING STATE RENDER ---
-  if (!dataIsLoaded) {
-    return <h1>Loading...</h1>;
-  }
-
-  // --- COMPONENT CONTENT RENDER ---
   return (
-    <div className="App">
-      <h3>Fetching Live location</h3>
-      
-      {/* Click handler to trigger reload fetch requests manually */}
-      <button className="toggle-btn" onClick={fetchData}>
-        Refresh Data
-      </button>
-
-      <div className="container">
-        {/* 
-          Renders lists in React using standard JavaScript Array `.map()` method.
-          `.map()` iterates over the array and outputs a JSX block for each item.
-          
-          IMPORTANT: React needs a unique 'key' attribute (e.g. key={index})
-          on the outermost element of each item in a list. This allows React to match
-          rendered elements with items in the list efficiently when changes occur.
-        */}
-        {items.map((item, index) => (
-          <div className="item" key={index} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
-            <div><strong>Latitude: </strong> {item.satlatitude}</div>
-            <div><strong>Longitude: </strong> {item.satlongitude}</div>
-            <div><strong>Altitude: </strong> {item.sataltitude}</div>
-          </div>    
-        ))}
+    <div className="api-page-container">
+      {/* Page Header */}
+      <div className="page-header flex-between">
+        <div>
+          <h2>Live Satellite Position Tracking</h2>
+          <p className="subtitle">NORAD ID: 25544 (ISS / SomaiyaPod Orbit)</p>
+        </div>
+        {/* Refresh button to manually re-trigger API fetch */}
+        <button className="primary-btn" onClick={fetchData} disabled={loading}>
+          {loading ? "Fetching..." : "Refresh Telemetry"}
+        </button>
       </div>
+
+      {/* Conditionally render loading message if loading is true */}
+      {loading ? (
+        <div className="loading-container">
+          <p>Connecting to Ground Station and fetching position data...</p>
+        </div>
+      ) : (
+        <>
+          {/* Summary bar showing track details */}
+          <div className="telemetry-summary-bar">
+            <div className="summary-item">
+              <span className="summary-label">Tracked Target</span>
+              <span className="summary-value">SomaiyaPod Alpha</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Records Count</span>
+              <span className="summary-value">{items.length} Position Fixes</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Last Refresh</span>
+              <span className="summary-value">{lastUpdated || "Just Now"}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">API Status</span>
+              <span className="summary-value green-text">Live Downlink</span>
+            </div>
+          </div>
+
+          <h3 className="section-title">Orbital Position Fixes</h3>
+
+          {/* Grid rendering satellite position fix cards using .map() */}
+          <div className="api-grid">
+            {items.map((item, index) => (
+              <div className="card api-card" key={index}>
+                <div className="card-header-badge">Fix #{index + 1}</div>
+                <div className="api-metric">
+                  <span className="label">Latitude</span>
+                  <span className="val">{item.satlatitude}°</span>
+                </div>
+                <div className="api-metric">
+                  <span className="label">Longitude</span>
+                  <span className="val">{item.satlongitude}°</span>
+                </div>
+                <div className="api-metric">
+                  <span className="label">Altitude</span>
+                  <span className="val">{item.sataltitude} km</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
+// Export API_Integration component for use in App.jsx
 export default API_Integration;

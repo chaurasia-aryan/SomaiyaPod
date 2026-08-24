@@ -1,76 +1,68 @@
-/**
- * App.jsx - Main Application Component
- * 
- * This file contains the root React component of our application. It manages state,
- * handles lifecycle side effects, renders the navigation bar, and controls conditional
- * views (login forms vs. the dashboard telemetry system).
- */
-
+// Import React core library and standard hooks (useState for state, useEffect for side effects)
 import React, { useState, useEffect } from "react";
+
+// Import child page components
 import Navbar from "./Navbar";
 import Forms from "./Forms";
 import LiveData from "./API_Intergration";
+import MissionInfo from "./MissionInfo";
 
 /**
- * 1. TelemetryCard Component
- * 
- * This is a reusable child component. Instead of writing card layout multiple times,
- * we write it once and customize it using parameters called "Props" ({ title, value, subtext }).
+ * TelemetryCard Component
+ * Reusable card to display satellite telemetry values (battery, altitude, temp, etc.)
  */
-function TelemetryCard({ title, value, subtext }) {
+function TelemetryCard({ title, value, subtext, statusColor }) {
   return (
-    <div className="card">
+    <div className="card telemetry-card">
       <div className="card-title">{title}</div>
       <div className="card-value">{value}</div>
-      {/* Short-circuit evaluation: only render subtext if it is provided */}
-      {subtext && <div className="card-subtext">{subtext}</div>}
+      {subtext && (
+        <div className={`card-subtext ${statusColor ? statusColor : ""}`}>
+          {subtext}
+        </div>
+      )}
     </div>
   );
 }
 
 /**
- * 2. Main App Component
- * 
- * Receives satellite data as props from `main.jsx` (destructured as satelliteid, name, orbit, frequency).
+ * Main App Component
+ * Receives satellite initial properties (satelliteid, name, orbit, frequency) from main.jsx
  */
 function App({ satelliteid, name, orbit, frequency }) {
-  // --- STATE DECLARATIONS ---
-  // useState is a React hook that lets components "remember" and update dynamic values.
-  // When a state variable changes, React automatically re-renders the component to show updated values.
-  
-  // `battery` keeps track of the satellite charge. Default value is 88%.
+  // State 1: Battery level percentage (default 88%)
   const [battery, setBattery] = useState(88);
-  
-  // `temperature` stores onboard temperature. Since there's no updater, it stays constant at 22.5.
+
+  // State 2: Constant onboard temperature value
   const [temperature] = useState(22.5);
-  
-  // `status` is a text status updated depending on the battery level.
+
+  // State 3: Operational status message string
   const [status, setStatus] = useState("AI Data Routing Active");
-  
-  // `isLoggedIn` determines if the user is authenticated. Default is false.
+
+  // State 4: Boolean flag tracking if user is logged in (default false)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // --- LIFE CYCLE / SIDE EFFECTS (useEffect) ---
-  // useEffect tells React that your component needs to do something after rendering.
+  // State 5: Active navigation tab page string ('dashboard', 'live-api', 'request', 'about')
+  const [activePage, setActivePage] = useState("dashboard");
 
   /**
-   * Effect 1: Battery Discharge Timer Simulation
-   * Run only ONCE when the component first mounts (empty dependency array: []).
-   * It creates a timer that decreases battery level by 1 every 3 seconds.
+   * Effect 1: Battery discharge timer simulation
+   * Runs once on component mount. Decreases battery by 1 every 3 seconds.
    */
   useEffect(() => {
+    // Create interval timer
     const timer = setInterval(() => {
-      // Functional state update: receives current value and calculates the next one.
+      // Functional state update to reduce battery level
       setBattery((prev) => (prev > 30 ? prev - 1 : 97));
     }, 3000);
 
-    // Clean up the timer when the component unmounts to prevent memory leaks.
+    // Cleanup timer function when component unmounts to prevent memory leak
     return () => clearInterval(timer);
-  }, []);
+  }, []); // Empty dependency array means run once on mount
 
   /**
-   * Effect 2: Status update based on battery level
-   * This effect runs every time the `battery` state changes (dependent on [battery]).
+   * Effect 2: Update status text based on battery percentage
+   * Re-runs whenever battery state changes.
    */
   useEffect(() => {
     if (battery < 70) {
@@ -80,83 +72,131 @@ function App({ satelliteid, name, orbit, frequency }) {
     }
   }, [battery]);
 
-  // --- RENDER RETURN ---
-  // The JSX returned by this function describes the UI structure.
-  return (
-    <>
-      {/* 3. Render our brand-new basic Navbar component and pass a dynamic title prop */}
-      <Navbar title="OrbitCommand v1.0" />
+  // Callback function triggered when login form validates successfully
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setActivePage("dashboard");
+  };
 
-      <main>
-        {/* Render dynamic name prop passed from main.jsx */}
-        <h1>{name}!</h1>
-        <p className="subtitle">
-          Welcome to Mission Control <span className="code-tag">(KJS-SRS-01)</span>
-        </p>
+  // Helper function returning JSX content for the selected page tab
+  const renderContent = () => {
+    switch (activePage) {
+      // Render Live API Tracker page
+      case "live-api":
+        return <LiveData />;
 
-        {/* 
-          4. CONDITIONAL RENDERING
-          Using JavaScript's ternary operator (? :):
-          - If the user is NOT logged in (!isLoggedIn), show the login/registration Forms.
-          - If the user IS logged in, show the satellite telemetry dashboard and a logout button.
-        */}
-        {!isLoggedIn ? (
-          // We pass a function trigger `onLoginSuccess` to child Form component.
-          // When child component calls this, it will set isLoggedIn to true in parent.
-          <Forms onLoginSuccess={() => setIsLoggedIn(true)} />
-        ) : (
-          <>
-            {/* Log out option */}
-            <center>
-              <button className="toggle-btn" onClick={() => setIsLoggedIn(false)}>
-                Logout
-              </button>
-            </center>
-            
-            <h2 className="section-title">Satellite Telemetry Metrics</h2>
-            
-            {/* Grid display using TelemetryCard components */}
+      // Render Mission Info page
+      case "about":
+        return <MissionInfo />;
+
+      // Render Data Request registration page
+      case "request":
+        return <Forms onLoginSuccess={handleLoginSuccess} />;
+
+      // Default view: Dashboard
+      case "dashboard":
+      default:
+        // If user is not logged in, render Login / Data Request forms
+        if (!isLoggedIn) {
+          return <Forms onLoginSuccess={handleLoginSuccess} />;
+        }
+
+        // If user IS logged in, render Telemetry Metrics dashboard
+        return (
+          <div className="dashboard-container">
+            {/* Dashboard Header */}
+            <div className="dashboard-header flex-between">
+              <div>
+                <h2>{name || "SomaiyaPod Satellite"}</h2>
+                <p className="subtitle">
+                  Mission Control Portal <span className="code-tag">(KJS-SRS-01)</span>
+                </p>
+              </div>
+              <div className="status-badge green-badge">
+                Telemetry Stream Online
+              </div>
+            </div>
+
+            <h3 className="section-title">Satellite Telemetry Metrics</h3>
+
+            {/* Grid display rendering TelemetryCard components */}
             <div className="card-grid">
-              <TelemetryCard title="Satellite ID" value={satelliteid} />
-              
+              <TelemetryCard
+                title="Satellite ID"
+                value={satelliteid || "CUBESAT-01"}
+                subtext="NORAD Tracked"
+              />
+
               <TelemetryCard
                 title="System Status"
                 value={status}
                 subtext="AI Mode: M17 Digital Voice"
+                statusColor={battery < 70 ? "warning-text" : "green-text"}
               />
-              
+
               <TelemetryCard
                 title="Battery Power"
                 value={`${battery}%`}
-                subtext="Solar Charging OK"
+                subtext={battery > 70 ? "Solar Charging Nominal" : "Low Power Mode"}
+                statusColor={battery > 70 ? "green-text" : "warning-text"}
               />
-              
+
               <TelemetryCard
                 title="Onboard Temperature"
                 value={`${temperature} °C`}
                 subtext="Thermal Status Nominal"
+                statusColor="green-text"
               />
-              
+
               <TelemetryCard
                 title="Orbital Altitude"
-                value={orbit}
+                value={orbit || "500 km"}
                 subtext="Pass Window: 8 mins"
               />
-              
+
               <TelemetryCard
                 title="RF Frequency"
-                value={frequency}
+                value={frequency || "436.500 MHz"}
                 subtext="UHF Amateur Radio Band"
               />
-              
-              {/* Fetches and renders live location data from an external API */}
-              <LiveData></LiveData>
             </div>
-          </>
-        )}
-      </main>
-    </>
+
+            {/* Quick page switch buttons */}
+            <div className="quick-actions-bar">
+              <button
+                className="secondary-btn"
+                onClick={() => setActivePage("live-api")}
+              >
+                View Live Satellite Tracker API
+              </button>
+              <button
+                className="secondary-btn"
+                onClick={() => setActivePage("about")}
+              >
+                Mission Technical Specifications
+              </button>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="app-container">
+      {/* Top Navbar */}
+      <Navbar
+        title="SomaiyaPod Mission Control"
+        activePage={activePage}
+        setActivePage={setActivePage}
+        isLoggedIn={isLoggedIn}
+        onLogout={() => setIsLoggedIn(false)}
+      />
+
+      {/* Main page content container */}
+      <main className="main-content">{renderContent()}</main>
+    </div>
   );
 }
 
+// Export App component as default export for main.jsx
 export default App;

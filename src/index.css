@@ -1,177 +1,589 @@
 /* 
-  index.css - Stylesheet for the Student React Project
-  
-  This file uses standard, straightforward CSS properties that are easy for 
-  beginners to understand. We use standard colors, simple flexbox, and basic 
-  border styles.
+  index.css - SomaiyaPod Clean Light Theme Stylesheet
+  Simple, functional, flat light mode with no glows or excessive animations.
 */
 
-/* 1. Global Reset & Body Styling */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #121824; /* Dark blue-grey background */
-  color: #f1f5f9; /* Light text color for readability */
+:root {
+  --bg-light: #f8fafc;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --border-dark: #cbd5e1;
+  --primary-blue: #2563eb;
+  --primary-blue-hover: #1d4ed8;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-subtle: #334155;
+  --accent-green: #16a34a;
+  --accent-red: #dc2626;
+  --accent-yellow: #d97706;
+  --radius-sm: 4px;
+  --radius-md: 6px;
 }
 
-/* 2. Basic Sticky Navigation Bar */
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* App Container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Navbar */
 .navbar {
-  background-color: #1e293b; /* Solid dark background */
-  border-bottom: 2px solid #334155; /* Simple border separator */
-  padding: 15px 30px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 24px;
 }
 
 .navbar-container {
+  max-width: 1050px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
 .navbar-logo {
-  font-size: 22px;
-  font-weight: bold;
-  color: #3b82f6; /* Classic blue brand color */
+  color: var(--primary-blue);
 }
 
 .navbar-links {
-  list-style: none;
   display: flex;
-  margin: 0;
-  padding: 0;
+  list-style: none;
+  gap: 4px;
 }
 
-.navbar-links li {
-  margin-left: 20px;
+.nav-link {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
-.navbar-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 16px;
+.nav-link:hover {
+  color: var(--text-main);
+  background-color: #f1f5f9;
 }
 
-.navbar-links a:hover,
-.navbar-links a.active {
-  color: #ffffff; /* Turns white on hover or active */
-  text-decoration: underline; /* Simple text decoration for feedback */
+.nav-link.active {
+  color: #ffffff;
+  background-color: var(--primary-blue);
 }
 
-/* 3. Main Container Layout */
-main {
-  max-width: 800px;
-  margin: 30px auto;
-  padding: 0 20px;
+.navbar-actions .logout-btn,
+.navbar-actions .login-nav-btn {
+  background: #fef2f2;
+  color: var(--accent-red);
+  border: 1px solid #fecaca;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
-h1 {
-  font-size: 32px;
-  color: #3b82f6;
+.navbar-actions .login-nav-btn {
+  background: #eff6ff;
+  color: var(--primary-blue);
+  border: 1px solid #bfdbfe;
+}
+
+.navbar-actions .logout-btn:hover {
+  background: var(--accent-red);
+  color: white;
+}
+
+.navbar-actions .login-nav-btn:hover {
+  background: var(--primary-blue);
+  color: white;
+}
+
+/* Main Content Wrapper */
+.main-content {
+  max-width: 1050px;
+  width: 100%;
+  margin: 24px auto;
+  padding: 0 20px 40px;
+}
+
+/* Common Layout Utilities */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .subtitle {
-  color: #94a3b8;
-  font-size: 16px;
-  margin-bottom: 30px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 2px;
 }
 
 .code-tag {
-  background-color: #1e293b;
+  background-color: #f1f5f9;
+  color: var(--text-subtle);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-color);
 }
 
 .section-title {
-  margin-top: 40px;
-  font-size: 22px;
-  border-bottom: 1px solid #334155;
-  padding-bottom: 5px;
+  font-size: 1.1rem;
+  color: var(--text-subtle);
+  margin: 24px 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* 4. Telemetry Card Grid System (Using Flexbox or Simple Grid) */
+/* Badges */
+.status-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+}
+
+.green-badge {
+  background: #f0fdf4;
+  color: var(--accent-green);
+  border: 1px solid #bbf7d0;
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
 }
 
-/* Telemetry Cards */
-.card {
-  background-color: #1e293b;
-  border: 1px solid #475569;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.card:hover {
-  border-color: #3b82f6; /* Card border changes to blue on hover */
+.telemetry-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .card-title {
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  margin-bottom: 5px;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
 .card-value {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .card-subtext {
-  font-size: 12px;
-  color: #4ade80; /* Light green subtext for success statuses */
-  margin-top: 5px;
+  font-size: 0.82rem;
+  margin-top: 6px;
+  color: var(--text-muted);
 }
 
-/* 5. Standard Interactive Buttons */
-.toggle-btn, .refresh-button {
-  background-color: #3b82f6;
+.green-text {
+  color: var(--accent-green) !important;
+}
+
+.warning-text {
+  color: var(--accent-yellow) !important;
+}
+
+/* Buttons */
+.primary-btn, .secondary-btn {
+  background-color: var(--primary-blue);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-blue-hover);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background-color: #ffffff;
+  border: 1px solid var(--border-dark);
+  color: var(--text-subtle);
+}
+
+.secondary-btn:hover {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  background-color: #f8fafc;
+}
+
+.quick-actions-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+/* Forms & Validation Styling */
+.auth-wrapper {
+  max-width: 450px;
+  margin: 24px auto;
+}
+
+.form-toggle-bar {
+  display: flex;
+  background: #ffffff;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}
+
+.toggle-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.toggle-tab.active {
+  background: var(--primary-blue);
+  color: white;
+}
+
+.form-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.form-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 4px;
+  color: var(--text-main);
+}
+
+.form-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
   margin-bottom: 20px;
 }
 
-.toggle-btn:hover, .refresh-button:hover {
-  background-color: #2563eb;
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* 6. Form Styling */
-form {
-  background-color: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  padding: 30px;
-  max-width: 450px;
-  margin: 20px auto;
-  text-align: left;
+.form-group label {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-subtle);
 }
 
-form h2 {
-  margin-top: 0;
-  font-size: 22px;
-  color: #ffffff;
-}
-
-input, select, textarea {
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  background-color: #0f172a;
-  border: 1px solid #475569;
-  border-radius: 4px;
-  color: white;
-  box-sizing: border-box;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.95rem;
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #3b82f6;
+  border-color: var(--primary-blue);
   outline: none;
+}
+
+/* Validation Error Styles */
+input.input-error, select.input-error, textarea.input-error {
+  border-color: var(--accent-red) !important;
+  background-color: #fef2f2;
+}
+
+.error-message {
+  color: var(--accent-red);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.checkbox-group {
+  margin-top: 6px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-subtle);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+/* Mission Info Page */
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.mission-card {
+  position: relative;
+}
+
+.card-header-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  color: var(--primary-blue);
+  border: 1px solid var(--border-color);
+}
+
+.mission-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 14px;
+  color: var(--text-main);
+}
+
+.info-list {
+  list-style: square;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-subtle);
+}
+
+.spec-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.spec-label {
+  color: var(--text-muted);
+}
+
+.spec-val {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.health-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot.green {
+  background-color: var(--accent-green);
+}
+
+.status-name {
+  flex: 1;
+  color: var(--text-subtle);
+}
+
+.status-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+/* API Page */
+.api-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notice-banner {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: var(--accent-yellow);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.telemetry-summary-bar {
+  display: flex;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.summary-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.api-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.api-card {
+  position: relative;
+}
+
+.api-metric {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.88rem;
+}
+
+.api-metric .label {
+  color: var(--text-muted);
+}
+
+.api-metric .val {
+  font-weight: 600;
+  color: var(--primary-blue);
+}
+
+/* Success Card */
+.success-card {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .navbar-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .navbar-links {
+    width: 100%;
+    justify-content: center;
+  }
+  .telemetry-summary-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
 }
