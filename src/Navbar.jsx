@@ -24,9 +24,7 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
           {/* Dashboard tab button */}
           <li>
             <button
-              // Apply 'active' CSS class if current activePage is 'dashboard'
               className={`nav-link ${activePage === "dashboard" ? "active" : ""}`}
-              // Update active page state when clicked
               onClick={() => setActivePage("dashboard")}
             >
               Dashboard
@@ -36,21 +34,27 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
           {/* Live API Tracker tab button */}
           <li>
             <button
-              // Apply 'active' CSS class if current activePage is 'live-api'
               className={`nav-link ${activePage === "live-api" ? "active" : ""}`}
-              // Update active page state when clicked
               onClick={() => setActivePage("live-api")}
             >
               Live API Tracker
             </button>
           </li>
 
+          {/* AI Diagnostics tab button */}
+          <li>
+            <button
+              className={`nav-link ${activePage === "ai" ? "active" : ""}`}
+              onClick={() => setActivePage("ai")}
+            >
+              AI Diagnostics
+            </button>
+          </li>
+
           {/* Data Request tab button */}
           <li>
             <button
-              // Apply 'active' CSS class if current activePage is 'request'
               className={`nav-link ${activePage === "request" ? "active" : ""}`}
-              // Update active page state when clicked
               onClick={() => setActivePage("request")}
             >
               Data Request
@@ -60,9 +64,7 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
           {/* Mission Info tab button */}
           <li>
             <button
-              // Apply 'active' CSS class if current activePage is 'about'
               className={`nav-link ${activePage === "about" ? "active" : ""}`}
-              // Update active page state when clicked
               onClick={() => setActivePage("about")}
             >
               Mission Info
@@ -73,12 +75,10 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
         {/* Auth section: Show logout button if logged in, else show login button */}
         <div className="navbar-actions">
           {isLoggedIn ? (
-            // Call onLogout function passed from App component when clicked
             <button className="logout-btn" onClick={onLogout}>
               Logout
             </button>
           ) : (
-            // Switch to login/dashboard view when clicked
             <button className="login-nav-btn" onClick={() => setActivePage("dashboard")}>
               Login
             </button>

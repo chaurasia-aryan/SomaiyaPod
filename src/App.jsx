@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Forms from "./Forms";
 import LiveData from "./API_Intergration";
 import MissionInfo from "./MissionInfo";
+import AIPredictor from "./AIPredictor";
 
 /**
  * TelemetryCard Component
@@ -42,7 +43,7 @@ function App({ satelliteid, name, orbit, frequency }) {
   // State 4: Boolean flag tracking if user is logged in (default false)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // State 5: Active navigation tab page string ('dashboard', 'live-api', 'request', 'about')
+  // State 5: Active navigation tab page string ('dashboard', 'live-api', 'ai', 'request', 'about')
   const [activePage, setActivePage] = useState("dashboard");
 
   /**
@@ -50,15 +51,12 @@ function App({ satelliteid, name, orbit, frequency }) {
    * Runs once on component mount. Decreases battery by 1 every 3 seconds.
    */
   useEffect(() => {
-    // Create interval timer
     const timer = setInterval(() => {
-      // Functional state update to reduce battery level
       setBattery((prev) => (prev > 30 ? prev - 1 : 97));
     }, 3000);
 
-    // Cleanup timer function when component unmounts to prevent memory leak
     return () => clearInterval(timer);
-  }, []); // Empty dependency array means run once on mount
+  }, []);
 
   /**
    * Effect 2: Update status text based on battery percentage
@@ -85,6 +83,10 @@ function App({ satelliteid, name, orbit, frequency }) {
       case "live-api":
         return <LiveData />;
 
+      // Render AI Telemetry Diagnostics page
+      case "ai":
+        return <AIPredictor />;
+
       // Render Mission Info page
       case "about":
         return <MissionInfo />;
@@ -96,12 +98,10 @@ function App({ satelliteid, name, orbit, frequency }) {
       // Default view: Dashboard
       case "dashboard":
       default:
-        // If user is not logged in, render Login / Data Request forms
         if (!isLoggedIn) {
           return <Forms onLoginSuccess={handleLoginSuccess} />;
         }
 
-        // If user IS logged in, render Telemetry Metrics dashboard
         return (
           <div className="dashboard-container">
             {/* Dashboard Header */}
@@ -168,6 +168,12 @@ function App({ satelliteid, name, orbit, frequency }) {
                 onClick={() => setActivePage("live-api")}
               >
                 View Live Satellite Tracker API
+              </button>
+              <button
+                className="secondary-btn"
+                onClick={() => setActivePage("ai")}
+              >
+                Run AI Telemetry Diagnostics
               </button>
               <button
                 className="secondary-btn"
