@@ -6,43 +6,69 @@ const API_Integration = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState("");
+  const [error, setError] = useState("");
 
-  const fetchData = (keyToUse = apiKey) => {
+  const fetchData = async (keyToUse = apiKey) => {
     if (!keyToUse) return;
 
     setLoading(true);
 
-    fetch(`/api/rest/v1/satellite/positions/25544/41.702/-76.014/0/2/&apiKey=${keyToUse}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.positions && json.positions.length > 0) {
-          setItems(json.positions);
-        } else {
-          setItems([
-            { satlatitude: 41.7021, satlongitude: -76.0142, sataltitude: 419.25 },
-            { satlatitude: 41.7450, satlongitude: -75.9810, sataltitude: 419.30 }
-          ]);
-        }
-        setLoading(false);
-        setLastUpdated(new Date().toLocaleTimeString());
-      })
-      .catch((err) => {
-        console.error("API error:", err);
+    try {
+      const response = await fetch(
+        `/api/rest/v1/satellite/positions/25544/41.702/-76.014/0/2/&apiKey=${keyToUse}`
+      );
+      const json = await response.json();
+
+      if (json.positions && json.positions.length > 0) {
+        setItems(json.positions);
+      } else {
         setItems([
           { satlatitude: 41.7021, satlongitude: -76.0142, sataltitude: 419.25 },
           { satlatitude: 41.7450, satlongitude: -75.9810, sataltitude: 419.30 }
         ]);
-        setLoading(false);
-        setLastUpdated(new Date().toLocaleTimeString());
-      });
+      }
+    } catch (err) {
+      console.error("API error:", err);
+      setItems([
+        { satlatitude: 41.7021, satlongitude: -76.0142, sataltitude: 419.25 },
+        { satlatitude: 41.7450, satlongitude: -75.9810, sataltitude: 419.30 }
+      ]);
+    } finally {
+      setLoading(false);
+      setLastUpdated(new Date().toLocaleTimeString());
+    }
   };
 
-  const handleKeySubmit = (e) => {
+  const handleKeySubmit = async (e) => {
     e.preventDefault();
-    const key = apiKey.trim() || "NCDLWM-WMLKTR-4CJXPV-5TGN";
+    const key = apiKey.trim();
+
+    if (!key) {
+      setError("API Key is required!");
+      return;
+    }
+
+    if (key.length < 6) {
+      setError("API Key must be at least 6 characters long!");
+      return;
+    }
+
+    const keyPattern = /^[A-Za-z0-9-]+$/;
+    if (!keyPattern.test(key)) {
+      setError("API Key can only contain letters, numbers, and hyphens!");
+      return;
+    }
+
+    setError("");
     setApiKey(key);
     setApiKeySubmitted(true);
-    fetchData(key);
+    await fetchData(key);
+  };
+
+  const handleFillDemoKey = () => {
+    const demoKey = "NCDLWM-WMLKTR-4CJXPV-5TGN";
+    setApiKey(demoKey);
+    setError("");
   };
 
   if (!apiKeySubmitted) {
@@ -54,18 +80,28 @@ const API_Integration = () => {
 
           <form onSubmit={handleKeySubmit}>
             <div className="form-group">
-              <label>API Key</label>
+              <label>API Key *</label>
               <input
                 type="text"
                 placeholder="e.g. NCDLWM-WMLKTR-4CJXPV-5TGN"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  if (error) setError("");
+                }}
+                className={error ? "input-error" : ""}
               />
+              {error && <span className="error-message">{error}</span>}
             </div>
 
-            <button type="submit" className="primary-btn">
-              Connect API & View Tracking
-            </button>
+            <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+              <button type="submit" className="primary-btn" style={{ flex: 1 }}>
+                Connect API & View Tracking
+              </button>
+              <button type="button" className="secondary-btn" onClick={handleFillDemoKey}>
+                Use Demo Key
+              </button>
+            </div>
           </form>
         </div>
       </div>

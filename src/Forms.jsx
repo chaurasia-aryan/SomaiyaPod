@@ -1,12 +1,25 @@
 import React, { useState } from "react";
 
+const mockDatabaseAuth = async (username, password) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (username && password) {
+        resolve({ success: true, user: { username, role: "Operator" } });
+      } else {
+        resolve({ success: false, message: "Invalid Database Credentials" });
+      }
+    }, 1000);
+  });
+};
+
 function LoginForm({ onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let valid = true;
@@ -31,7 +44,21 @@ function LoginForm({ onLoginSuccess }) {
     }
 
     if (valid) {
-      onLoginSuccess();
+      setIsSubmitting(true);
+      try {
+        const dbResponse = await mockDatabaseAuth(username, password);
+
+        if (dbResponse.success) {
+          onLoginSuccess();
+        } else {
+          setPasswordError(dbResponse.message);
+        }
+      } catch (err) {
+        console.error("DB Auth error:", err);
+        setPasswordError("Database connection failed. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -49,6 +76,7 @@ function LoginForm({ onLoginSuccess }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className={usernameError ? "input-error" : ""}
+            disabled={isSubmitting}
           />
           {usernameError && <span className="error-message">{usernameError}</span>}
         </div>
@@ -61,12 +89,13 @@ function LoginForm({ onLoginSuccess }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={passwordError ? "input-error" : ""}
+            disabled={isSubmitting}
           />
           {passwordError && <span className="error-message">{passwordError}</span>}
         </div>
 
-        <button type="submit" className="primary-btn">
-          Login & Access Dashboard
+        <button type="submit" className="primary-btn" disabled={isSubmitting}>
+          {isSubmitting ? "Verifying DB Credentials..." : "Login & Access Dashboard"}
         </button>
       </form>
     </div>
