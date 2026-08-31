@@ -1,13 +1,22 @@
 import React, { useState, useMemo } from "react";
 
+// AI Telemetry Diagnostics & Orbit Predictor Component
+// Uses React's useMemo hook to optimize performance by memoizing complex telemetry prediction calculations.
 function AIPredictor() {
-  const [altitude, setAltitude] = useState(500);
-  const [signalNoise, setSignalNoise] = useState(15);
-  const [batteryHealth, setBatteryHealth] = useState("Nominal");
+  // State hooks for telemetry input simulation parameters
+  const [altitude, setAltitude] = useState(500); // Orbital altitude in kilometers
+  const [signalNoise, setSignalNoise] = useState(15); // Signal-to-Noise ratio in dB
+  const [batteryHealth, setBatteryHealth] = useState("Nominal"); // Battery health status condition
 
+  // useMemo Hook Integration:
+  // Memoizes the AI diagnostic analysis calculations.
+  // The prediction logic is executed ONLY when one of the dependencies
+  // [altitude, signalNoise, batteryHealth] changes, preventing unnecessary recalculations on unrelated component re-renders.
   const analysisResult = useMemo(() => {
+    // 1. Calculate ground station orbital pass window based on altitude
     const passWindow = altitude > 500 ? "10 minutes" : "8 minutes";
 
+    // 2. Assess anomaly risk score based on battery health condition
     let riskScore = "2% (Low Risk)";
     if (batteryHealth === "Degraded") {
       riskScore = "5% (Moderate Risk)";
@@ -15,29 +24,37 @@ function AIPredictor() {
       riskScore = "12% (High Risk)";
     }
 
+    // 3. Determine subsystem health assessment status
     const healthStatus = batteryHealth === "Nominal" ? "Optimal Health" : "Caution Advised";
 
+    // 4. Evaluate downlink link confidence based on Signal-to-Noise Ratio (SNR)
+    const downlinkConfidence = signalNoise > 15 ? "99%" : "95%";
+
+    // Return the memoized calculation object containing diagnostic metrics
     return {
       anomalyScore: riskScore,
       predictedPassWindow: passWindow,
       healthAssessment: healthStatus,
-      downlinkConfidence: signalNoise > 15 ? "99%" : "95%"
+      downlinkConfidence: downlinkConfidence
     };
-  }, [altitude, signalNoise, batteryHealth]);
+  }, [altitude, signalNoise, batteryHealth]); // Dependency array for useMemo
 
   return (
     <div className="ai-predictor-container">
+      {/* Page Title Header */}
       <div className="page-header">
         <h2>AI Telemetry Diagnostics & Orbit Predictor</h2>
         <p className="subtitle">Machine Learning Subsystem Health & Ground Node Pass Prediction</p>
       </div>
 
       <div className="mission-grid">
+        {/* Left Card: Input Parameter Controls */}
         <div className="card mission-card">
           <div className="card-header-badge">AI Input Controls</div>
           <h3>Telemetry Simulation Parameters</h3>
 
           <form onSubmit={(e) => e.preventDefault()}>
+            {/* Slider for Orbital Altitude */}
             <div className="form-group">
               <label>Orbital Altitude: {altitude} km</label>
               <input
@@ -50,6 +67,7 @@ function AIPredictor() {
               />
             </div>
 
+            {/* Slider for Signal-to-Noise Ratio */}
             <div className="form-group">
               <label>Signal-to-Noise Ratio: {signalNoise} dB</label>
               <input
@@ -62,6 +80,7 @@ function AIPredictor() {
               />
             </div>
 
+            {/* Dropdown for Battery Health Condition */}
             <div className="form-group">
               <label>Battery Health Condition</label>
               <select
@@ -76,6 +95,7 @@ function AIPredictor() {
           </form>
         </div>
 
+        {/* Right Card: Memoized AI Output Analysis */}
         <div className="card mission-card">
           <div className="card-header-badge">AI Output Analysis</div>
           <h3>Predicted Satellite Status</h3>
