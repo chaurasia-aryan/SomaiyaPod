@@ -1,43 +1,68 @@
 import React, { useState, useMemo } from "react";
 
 // AI Telemetry Diagnostics & Orbit Predictor Component
-// Uses React's useMemo hook to optimize performance by memoizing complex telemetry prediction calculations.
+// Uses React's useMemo hook to optimize performance by memoizing complex telemetry prediction calculations,
+// with interactive options to toggle useMemo optimization and create telemetry checkpoints.
 function AIPredictor() {
   // State hooks for telemetry input simulation parameters
   const [altitude, setAltitude] = useState(500); // Orbital altitude in kilometers
   const [signalNoise, setSignalNoise] = useState(15); // Signal-to-Noise ratio in dB
   const [batteryHealth, setBatteryHealth] = useState("Nominal"); // Battery health status condition
 
-  // useMemo Hook Integration:
-  // Memoizes the AI diagnostic analysis calculations.
-  // The prediction logic is executed ONLY when one of the dependencies
-  // [altitude, signalNoise, batteryHealth] changes, preventing unnecessary recalculations on unrelated component re-renders.
-  const analysisResult = useMemo(() => {
+  // Option state hooks for useMemo toggle & telemetry checkpointing
+  const [useMemoEnabled, setUseMemoEnabled] = useState(true); // Toggle to use/bypass useMemo
+  const [checkpoint, setCheckpoint] = useState(null); // Saved telemetry checkpoint state
+
+  // Internal diagnostic calculation logic
+  const computeDiagnostics = (alt, snr, battery) => {
     // 1. Calculate ground station orbital pass window based on altitude
-    const passWindow = altitude > 500 ? "10 minutes" : "8 minutes";
+    const passWindow = alt > 500 ? "10 minutes" : "8 minutes";
 
     // 2. Assess anomaly risk score based on battery health condition
     let riskScore = "2% (Low Risk)";
-    if (batteryHealth === "Degraded") {
+    if (battery === "Degraded") {
       riskScore = "5% (Moderate Risk)";
-    } else if (batteryHealth === "Critical") {
+    } else if (battery === "Critical") {
       riskScore = "12% (High Risk)";
     }
 
     // 3. Determine subsystem health assessment status
-    const healthStatus = batteryHealth === "Nominal" ? "Optimal Health" : "Caution Advised";
+    const healthStatus = battery === "Nominal" ? "Optimal Health" : "Caution Advised";
 
     // 4. Evaluate downlink link confidence based on Signal-to-Noise Ratio (SNR)
-    const downlinkConfidence = signalNoise > 15 ? "99%" : "95%";
+    const downlinkConfidence = snr > 15 ? "99%" : "95%";
 
-    // Return the memoized calculation object containing diagnostic metrics
     return {
       anomalyScore: riskScore,
       predictedPassWindow: passWindow,
       healthAssessment: healthStatus,
       downlinkConfidence: downlinkConfidence
     };
-  }, [altitude, signalNoise, batteryHealth]); // Dependency array for useMemo
+  };
+
+  // useMemo Hook Integration:
+  // Memoizes the AI diagnostic analysis calculations when useMemoEnabled is true.
+  const memoizedAnalysis = useMemo(() => {
+    return computeDiagnostics(altitude, signalNoise, batteryHealth);
+  }, [altitude, signalNoise, batteryHealth]);
+
+  // If useMemo is enabled, use memoized result; otherwise perform direct unmemoized computation
+  const analysisResult = useMemoEnabled
+    ? memoizedAnalysis
+    : computeDiagnostics(altitude, signalNoise, batteryHealth);
+
+  // Handler to capture and save a telemetry checkpoint snapshot
+  const handleCreateCheckpoint = () => {
+    setCheckpoint({
+      timestamp: new Date().toLocaleTimeString(),
+      altitude,
+      signalNoise,
+      batteryHealth,
+      anomalyScore: analysisResult.anomalyScore,
+      predictedPassWindow: analysisResult.predictedPassWindow,
+      mode: useMemoEnabled ? "Memoized (useMemo)" : "Direct (Unmemoized)"
+    });
+  };
 
   return (
     <div className="ai-predictor-container">
@@ -48,7 +73,7 @@ function AIPredictor() {
       </div>
 
       <div className="mission-grid">
-        {/* Left Card: Input Parameter Controls */}
+        {/* Left Card: Input Parameter Controls & Checkpoint Options */}
         <div className="card mission-card">
           <div className="card-header-badge">AI Input Controls</div>
           <h3>Telemetry Simulation Parameters</h3>
@@ -92,10 +117,34 @@ function AIPredictor() {
                 <option value="Critical">Critical (Low Charge Threshold)</option>
               </select>
             </div>
+
+            {/* Option to Enable/Disable useMemo Optimization */}
+            <div className="form-group checkbox-group" style={{ marginTop: "14px" }}>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={useMemoEnabled}
+                  onChange={(e) => setUseMemoEnabled(e.target.checked)}
+                />
+                Use <code>useMemo</code> Optimization Hook
+              </label>
+            </div>
+
+            {/* Button to Save Telemetry Checkpoint */}
+            <div style={{ marginTop: "16px" }}>
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={handleCreateCheckpoint}
+                style={{ width: "100%" }}
+              >
+                Create Telemetry Checkpoint
+              </button>
+            </div>
           </form>
         </div>
 
-        {/* Right Card: Memoized AI Output Analysis */}
+        {/* Right Card: Memoized AI Output Analysis & Checkpoint View */}
         <div className="card mission-card">
           <div className="card-header-badge">AI Output Analysis</div>
           <h3>Predicted Satellite Status</h3>
@@ -118,10 +167,27 @@ function AIPredictor() {
               <span className="spec-val">{analysisResult.downlinkConfidence}</span>
             </div>
             <div className="spec-row">
-              <span className="spec-label">Optimization Mode:</span>
-              <span className="spec-val">Memoized (useMemo)</span>
+              <span className="spec-label">Optimization Status:</span>
+              <span className={`spec-val ${useMemoEnabled ? "green-text" : "warning-text"}`}>
+                {useMemoEnabled ? "Memoized (useMemo Active)" : "Direct (Unmemoized)"}
+              </span>
             </div>
           </div>
+
+          {/* Display Saved Checkpoint Information */}
+          {checkpoint && (
+            <div style={{ marginTop: "20px", padding: "12px", background: "#f8fafc", borderRadius: "6px", border: "1px solid #cbd5e1" }}>
+              <h4 style={{ fontSize: "0.9rem", color: "#2563eb", marginBottom: "6px" }}>
+                Saved Checkpoint ({checkpoint.timestamp})
+              </h4>
+              <div style={{ fontSize: "0.82rem", display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div><strong>Altitude:</strong> {checkpoint.altitude} km</div>
+                <div><strong>Battery:</strong> {checkpoint.batteryHealth}</div>
+                <div><strong>Risk Score:</strong> {checkpoint.anomalyScore}</div>
+                <div><strong>Mode:</strong> {checkpoint.mode}</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
