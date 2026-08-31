@@ -1,23 +1,14 @@
-// Import React to create functional UI component
 import React from "react";
 
-/**
- * MissionInfo Component
- * Displays satellite specifications, goals, and ground station parameters.
- */
 function MissionInfo() {
   return (
     <div className="mission-info-container">
-      {/* Page Title & Subtitle */}
       <div className="page-header">
         <h2>Mission Overview & Technical Specifications</h2>
         <p className="subtitle">SomaiyaPod CubeSat Initiative (KJS-SRS-01)</p>
       </div>
 
-      {/* Grid container for mission cards */}
       <div className="mission-grid">
-        
-        {/* Objectives Card */}
         <div className="card mission-card">
           <div className="card-header-badge">Objectives</div>
           <h3>Primary Mission Goals</h3>
@@ -29,7 +20,6 @@ function MissionInfo() {
           </ul>
         </div>
 
-        {/* Hardware Specifications Card */}
         <div className="card mission-card">
           <div className="card-header-badge">Hardware</div>
           <h3>CubeSat Technical Specifications</h3>
@@ -53,7 +43,6 @@ function MissionInfo() {
           </div>
         </div>
 
-        {/* Communications Card */}
         <div className="card mission-card">
           <div className="card-header-badge">Radio & Ground Station</div>
           <h3>Communications Parameters</h3>
@@ -73,7 +62,6 @@ function MissionInfo() {
           </div>
         </div>
 
-        {/* System Health Status Checklist Card */}
         <div className="card mission-card">
           <div className="card-header-badge">Health Check</div>
           <h3>Subsystem Status Checklist</h3>
@@ -95,11 +83,9 @@ function MissionInfo() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
 
-// Export MissionInfo component for use in App.jsx
 export default MissionInfo;

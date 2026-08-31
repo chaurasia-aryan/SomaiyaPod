@@ -1,8 +1,3 @@
-/* 
-  index.css - SomaiyaPod Clean Light Theme Stylesheet
-  Simple, functional, flat light mode with no glows or excessive animations.
-*/
-
 :root {
   --bg-light: #f8fafc;
   --bg-card: #ffffff;
@@ -20,7 +15,6 @@
   --radius-md: 6px;
 }
 
-/* Global Reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -35,14 +29,12 @@ body {
   min-height: 100vh;
 }
 
-/* App Container */
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* Navbar */
 .navbar {
   background-color: #ffffff;
   border-bottom: 1px solid var(--border-color);
@@ -124,7 +116,6 @@ body {
   color: white;
 }
 
-/* Main Content Wrapper */
 .main-content {
   max-width: 1050px;
   width: 100%;
@@ -132,7 +123,6 @@ body {
   padding: 0 20px 40px;
 }
 
-/* Common Layout Utilities */
 .flex-between {
   display: flex;
   justify-content: space-between;
@@ -175,7 +165,6 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
-/* Badges */
 .status-badge {
   font-size: 0.85rem;
   font-weight: 600;
@@ -191,7 +180,6 @@ body {
   border: 1px solid #bbf7d0;
 }
 
-/* Cards */
 .card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -240,7 +228,6 @@ body {
   color: var(--accent-yellow) !important;
 }
 
-/* Buttons */
 .primary-btn, .secondary-btn {
   background-color: var(--primary-blue);
   color: white;
@@ -280,7 +267,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* Forms & Validation Styling */
 .auth-wrapper {
   max-width: 450px;
   margin: 24px auto;
@@ -364,7 +350,6 @@ input:focus, select:focus, textarea:focus {
   outline: none;
 }
 
-/* Validation Error Styles */
 input.input-error, select.input-error, textarea.input-error {
   border-color: var(--accent-red) !important;
   background-color: #fef2f2;
@@ -394,7 +379,6 @@ input.input-error, select.input-error, textarea.input-error {
   cursor: pointer;
 }
 
-/* Mission Info Page */
 .mission-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -492,7 +476,6 @@ input.input-error, select.input-error, textarea.input-error {
   color: var(--accent-green);
 }
 
-/* API Page */
 .api-page-container {
   display: flex;
   flex-direction: column;
@@ -566,13 +549,11 @@ input.input-error, select.input-error, textarea.input-error {
   color: var(--primary-blue);
 }
 
-/* Success Card */
 .success-card {
   text-align: center;
   padding: 30px 20px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 640px) {
   .navbar-container {
     flex-direction: column;

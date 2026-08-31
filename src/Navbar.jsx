@@ -1,27 +1,18 @@
-// Import the React library to write React components
 import React from "react";
 
-// Navbar component receives props from parent component (App.jsx)
 function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
   return (
-    // Top navigation container bar
     <nav className="navbar">
       <div className="navbar-container">
-        
-        {/* Brand logo/title: Clicking it resets active page to dashboard */}
         <div 
           className="navbar-brand" 
           onClick={() => setActivePage("dashboard")} 
           style={{ cursor: "pointer" }}
         >
-          {/* Displays navbar title passed as a prop */}
           <span className="navbar-logo">{title}</span>
         </div>
 
-        {/* List of navigation page links */}
         <ul className="navbar-links">
-          
-          {/* Dashboard tab button */}
           <li>
             <button
               className={`nav-link ${activePage === "dashboard" ? "active" : ""}`}
@@ -31,7 +22,6 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
             </button>
           </li>
 
-          {/* Live API Tracker tab button */}
           <li>
             <button
               className={`nav-link ${activePage === "live-api" ? "active" : ""}`}
@@ -41,7 +31,6 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
             </button>
           </li>
 
-          {/* AI Diagnostics tab button */}
           <li>
             <button
               className={`nav-link ${activePage === "ai" ? "active" : ""}`}
@@ -51,7 +40,6 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
             </button>
           </li>
 
-          {/* Data Request tab button */}
           <li>
             <button
               className={`nav-link ${activePage === "request" ? "active" : ""}`}
@@ -61,7 +49,6 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
             </button>
           </li>
 
-          {/* Mission Info tab button */}
           <li>
             <button
               className={`nav-link ${activePage === "about" ? "active" : ""}`}
@@ -72,7 +59,6 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
           </li>
         </ul>
 
-        {/* Auth section: Show logout button if logged in, else show login button */}
         <div className="navbar-actions">
           {isLoggedIn ? (
             <button className="logout-btn" onClick={onLogout}>
@@ -84,11 +70,9 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
             </button>
           )}
         </div>
-
       </div>
     </nav>
   );
 }
 
-// Export Navbar component so it can be imported in App.jsx
 export default Navbar;
