@@ -1,0 +1,16 @@
+{
+  "name": "somaiya-satellite-comms",
+  "version": "1.0.0",
+  "description": "AI-driven autonomous satellite communication management system for SomaiyaSat and SomaiyaPod",
+  "main": "server/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0",
+    "cors": "^2.8.5"
+  }
+}

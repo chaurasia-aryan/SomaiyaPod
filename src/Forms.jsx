@@ -274,5 +274,4 @@ function Forms({ onLoginSuccess }) {
   );
 }
 
-// Export Forms component for use in App.jsx
 export default Forms;
