@@ -4,7 +4,7 @@ import cors from 'cors';
 
 const app = express();
 const PORT = 3000;
-const url = 'mongodb+srv://sourish:sourish@cluster0.z5sz4by.mongodb.net/somaiya-satellite';
+const url = 'mongodb+srv://';
 
 let db;
 
