@@ -77,26 +77,6 @@ function DataTab() {
     }
   };
 
-  // Load JSON file data using Core Node.js fs module
-  const handleLoadFileData = async () => {
-    setLoading(true);
-    setActionMessage("Reading telemetry.json using Core Node.js fs module...");
-    try {
-      const res = await fetch("/api/telemetry/file-based");
-      const data = await res.json();
-      if (data.success) {
-        setTelemetryList(data.data);
-        setActionMessage(`Loaded ${data.count} records from JSON file using fs.readFile`);
-      }
-    } catch (err) {
-      console.error("FS Read error:", err);
-    } finally {
-      setLoading(false);
-      setTimeout(() => setActionMessage(""), 5000);
-    }
-  };
-
-
   // 3. Delete a record from MongoDB
   const handleDeleteRecord = async (id) => {
     try {
@@ -174,14 +154,6 @@ function DataTab() {
             disabled={loading}
           >
             Seed Sample Data
-          </button>
-          <button
-            className="secondary-btn"
-            onClick={handleLoadFileData}
-            disabled={loading}
-            title="Demonstrate Core Node.js fs module reading JSON"
-          >
-            Load File Data (fs)
           </button>
           <button
             className="secondary-btn"

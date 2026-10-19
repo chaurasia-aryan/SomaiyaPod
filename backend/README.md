@@ -8,29 +8,23 @@ Node.js, Express, and MongoDB backend for the SomaiyaPod Mission Control platfor
 - External Satellite Ingestion: Live ISS / satellite telemetry fetch with simulation fallback.
 - AI Diagnostics: Automated mission analysis and chat powered by Google Gemini API.
 
-## Folder Structure (MVC Pattern)
+## Folder Structure
 ```text
 backend/
-|-- controllers/
-|   |-- authController.js       # User register, login & /me logic
-|   `-- telemetryController.js  # Telemetry CRUD, stats & fs reader
-|-- data/
-|   `-- telemetry.json          # File storage for Core Node fs demo
 |-- models/
-|   |-- Telemetry.js            # Mongoose telemetry schema
-|   `-- User.js                 # Mongoose user schema
+|   |-- Telemetry.js       # Sensor and flight telemetry Mongoose schema
+|   `-- User.js            # User authentication Mongoose schema
 |-- routes/
-|   |-- ai.js                   # Gemini AI diagnostics & chat
-|   |-- auth.js                 # Auth route definitions
-|   |-- externalApi.js          # Live satellite API fetch & save
-|   `-- telemetry.js            # Telemetry basic & dynamic routes
-|-- .env.example                # Environment variables template
-|-- coreServer.js               # Core Node.js HTTP server (http, url, fs)
-|-- db.js                       # MongoDB connection
-|-- division.md                 # 3-person viva breakdown & Q&A
-|-- package.json                # Dependencies & scripts
-|-- README.md                   # Documentation
-`-- server.js                   # Express app entry point
+|   |-- ai.js              # Gemini AI telemetry analysis & chat
+|   |-- auth.js            # User registration, login, and /me profile
+|   |-- externalApi.js     # Satellite API fetch & save with fallback
+|   `-- telemetry.js       # Telemetry CRUD, dynamic routes & stats
+|-- .env.example           # Environment template
+|-- db.js                  # MongoDB Mongoose connection
+|-- division.md            # 3-person viva breakdown and guide
+|-- package.json           # Dependencies and scripts
+|-- README.md              # Documentation
+`-- server.js              # Express app entry point
 ```
 
 ## Quick Start
