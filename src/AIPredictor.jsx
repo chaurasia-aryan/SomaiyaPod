@@ -1,143 +1,242 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+
+function renderInlineFormatting(str) {
+  if (!str) return "";
+  const parts = str.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+function FormattedReport({ text }) {
+  if (!text) return null;
+  const lines = text.split("\n");
+
+  return (
+    <div className="formatted-ai-report" style={{ lineHeight: 1.7, fontSize: "0.95rem" }}>
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={idx} style={{ height: "6px" }} />;
+
+        if (trimmed.startsWith("###") || trimmed.startsWith("##")) {
+          const headerText = trimmed.replace(/^#+\s*/, "");
+          return (
+            <h4 key={idx} style={{ margin: "16px 0 8px", color: "var(--primary-blue)", fontSize: "1.05rem" }}>
+              {headerText}
+            </h4>
+          );
+        }
+
+        if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          const itemText = trimmed.substring(2);
+          return (
+            <div key={idx} style={{ display: "flex", gap: "8px", margin: "4px 0", paddingLeft: "10px" }}>
+              <span style={{ color: "var(--primary-blue)", fontWeight: 700 }}>•</span>
+              <div>{renderInlineFormatting(itemText)}</div>
+            </div>
+          );
+        }
+
+        if (trimmed === "---") {
+          return <hr key={idx} style={{ margin: "14px 0", border: "none", borderTop: "1px solid var(--border-color)" }} />;
+        }
+
+        if (trimmed.startsWith("*(💡") || trimmed.startsWith("(💡")) {
+          return (
+            <div key={idx} className="notification-banner" style={{ margin: "14px 0", fontSize: "0.85rem" }}>
+              {renderInlineFormatting(trimmed.replace(/^\*\(|\)\*$/g, ""))}
+            </div>
+          );
+        }
+
+        return (
+          <p key={idx} style={{ margin: "4px 0" }}>
+            {renderInlineFormatting(trimmed)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 function AIPredictor() {
-  const [altitude, setAltitude] = useState(500);
-  const [signalNoise, setSignalNoise] = useState(15);
-  const [batteryHealth, setBatteryHealth] = useState("Nominal");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState({
-    anomalyScore: "2% (Low Risk)",
-    predictedPassWindow: "8 minutes",
-    healthAssessment: "Optimal Health",
-    downlinkConfidence: "98%"
-  });
+  const [aiReport, setAiReport] = useState("");
+  const [aiSource, setAiSource] = useState("");
+  const [telemetryCount, setTelemetryCount] = useState(0);
 
-  const runCountRef = useRef(0);
+  // Chat state
+  const [userQuestion, setUserQuestion] = useState("");
+  const [chatAnswer, setChatAnswer] = useState("");
+  const [isAsking, setIsAsking] = useState(false);
 
-  const runAIDiagnostics = () => {
+  // 1. Call Gemini AI to analyze recent MongoDB telemetry
+  const runGeminiAnalysis = async () => {
     setIsAnalyzing(true);
-    runCountRef.current = runCountRef.current + 1;
-
-    setTimeout(() => {
-      const passWindow = altitude > 500 ? "10 minutes" : "8 minutes";
-
-      let riskScore = "2% (Low Risk)";
-      if (batteryHealth === "Degraded") {
-        riskScore = "5% (Moderate Risk)";
-      } else if (batteryHealth === "Critical") {
-        riskScore = "12% (High Risk)";
-      }
-
-      const healthStatus = batteryHealth === "Nominal" ? "Optimal Health" : "Caution Advised";
-
-      setAnalysisResult({
-        anomalyScore: riskScore,
-        predictedPassWindow: passWindow,
-        healthAssessment: healthStatus,
-        downlinkConfidence: signalNoise > 15 ? "99%" : "95%"
+    try {
+      const res = await fetch("/api/ai/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
       });
-
+      const data = await res.json();
+      if (data.success) {
+        setAiReport(data.analysis);
+        setAiSource(data.source || "Google Gemini AI");
+        setTelemetryCount(data.dataCount || 0);
+      } else {
+        setAiReport("Failed to generate AI analysis: " + data.message);
+      }
+    } catch (err) {
+      console.error("AI Analysis error:", err);
+      setAiReport("Network error connecting to backend Gemini AI endpoint.");
+    } finally {
       setIsAnalyzing(false);
-    }, 1000);
+    }
+  };
+
+  // 2. Chat with Gemini about pod telemetry
+  const handleAskQuestion = async (e) => {
+    e.preventDefault();
+    if (!userQuestion.trim()) return;
+
+    setIsAsking(true);
+    setChatAnswer("");
+
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userQuestion }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setChatAnswer(data.reply);
+      } else {
+        setChatAnswer("AI Error: " + data.message);
+      }
+    } catch (err) {
+      console.error("Chat error:", err);
+      setChatAnswer("Error connecting to Gemini API.");
+    } finally {
+      setIsAsking(false);
+    }
   };
 
   useEffect(() => {
-    runAIDiagnostics();
+    runGeminiAnalysis();
   }, []);
 
   return (
     <div className="ai-predictor-container">
-      <div className="page-header">
-        <h2>AI Telemetry Diagnostics & Orbit Predictor</h2>
-        <p className="subtitle">Machine Learning Subsystem Health & Ground Node Pass Prediction</p>
+      <div className="page-header flex-between">
+        <div>
+          <h2>SomaiyaPod AI &amp; Gemini Diagnostics</h2>
+          <p className="subtitle">
+            Autonomous Machine Learning Telemetry Assessment &amp; Google Gemini AI Insights
+          </p>
+        </div>
+
+        <button
+          className="primary-btn"
+          onClick={runGeminiAnalysis}
+          disabled={isAnalyzing}
+        >
+          {isAnalyzing ? "Analyzing with Gemini..." : "✨ Run Gemini Diagnostics"}
+        </button>
       </div>
 
-      <div className="mission-grid">
-        <div className="card mission-card">
-          <div className="card-header-badge">AI Input Controls</div>
-          <h3>Telemetry Simulation Parameters</h3>
+      {/* Main Analysis Card */}
+      <div className="card" style={{ marginBottom: "24px" }}>
+        <div className="flex-between" style={{ marginBottom: "14px", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px" }}>
+          <div>
+            <span className="card-title">AI Diagnostics Engine</span>
+            <h3 style={{ margin: 0 }}>Mission Flight Analysis</h3>
+          </div>
+          <div className="flex-between" style={{ gap: "8px" }}>
+            <span className="code-tag">Source: {aiSource || "Gemini Engine"}</span>
+            <span className="badge badge-nominal">{telemetryCount} Records Analyzed</span>
+          </div>
+        </div>
 
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div className="form-group">
-              <label>Orbital Altitude: {altitude} km</label>
-              <input
-                type="range"
-                min="300"
-                max="800"
-                step="50"
-                value={altitude}
-                onChange={(e) => setAltitude(Number(e.target.value))}
-              />
-            </div>
+        {isAnalyzing ? (
+          <div className="loading-container">
+            <p>Processing MongoDB telemetry with Gemini AI...</p>
+          </div>
+        ) : (
+          <FormattedReport text={aiReport} />
+        )}
+      </div>
 
-            <div className="form-group">
-              <label>Signal-to-Noise Ratio: {signalNoise} dB</label>
-              <input
-                type="range"
-                min="5"
-                max="30"
-                step="5"
-                value={signalNoise}
-                onChange={(e) => setSignalNoise(Number(e.target.value))}
-              />
-            </div>
+      {/* Gemini Chat Question Section */}
+      <div className="card" style={{ marginTop: "20px" }}>
+        <h3>💬 Ask Gemini AI Flight Engineer</h3>
+        <p className="form-subtitle" style={{ marginBottom: "14px" }}>
+          Ask any question about SomaiyaPod health, battery life, orbital decay, or sensor anomalies.
+        </p>
 
-            <div className="form-group">
-              <label>Battery Health Condition</label>
-              <select
-                value={batteryHealth}
-                onChange={(e) => setBatteryHealth(e.target.value)}
-              >
-                <option value="Nominal">Nominal (100% Cell Capacity)</option>
-                <option value="Degraded">Degraded (80% Cell Capacity)</option>
-                <option value="Critical">Critical (Low Charge Threshold)</option>
-              </select>
-            </div>
-
+        <form onSubmit={handleAskQuestion}>
+          <div className="flex-between" style={{ gap: "10px", alignItems: "stretch" }}>
+            <input
+              type="text"
+              placeholder="e.g. Is our battery drain normal? What is the predicted next pass window?"
+              value={userQuestion}
+              onChange={(e) => setUserQuestion(e.target.value)}
+              className="filter-input"
+              style={{ flex: 1, padding: "10px 14px", fontSize: "0.95rem" }}
+              disabled={isAsking}
+            />
             <button
-              type="button"
+              type="submit"
               className="primary-btn"
-              onClick={runAIDiagnostics}
-              disabled={isAnalyzing}
+              disabled={isAsking || !userQuestion.trim()}
+              style={{ padding: "0 22px" }}
             >
-              {isAnalyzing ? "Processing AI Model..." : "Run AI Diagnostics"}
+              {isAsking ? "Thinking..." : "Ask Gemini"}
             </button>
-          </form>
+          </div>
+        </form>
+
+        {/* Quick Suggestion Chips */}
+        <div style={{ marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", alignSelf: "center" }}>Suggestions:</span>
+          {[
+            "How is the thermal temperature trend?",
+            "What happens if battery drops below 30%?",
+            "Is the orbital altitude stable?",
+          ].map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              className="filter-btn"
+              style={{ fontSize: "0.8rem", padding: "3px 10px" }}
+              onClick={() => setUserQuestion(suggestion)}
+            >
+              {suggestion}
+            </button>
+          ))}
         </div>
 
-        <div className="card mission-card">
-          <div className="card-header-badge">AI Output Analysis</div>
-          <h3>Predicted Satellite Status</h3>
-
-          {isAnalyzing ? (
-            <div className="loading-container">
-              <p>Analyzing telemetry logs...</p>
+        {chatAnswer && (
+          <div
+            className="card"
+            style={{
+              marginTop: "16px",
+              backgroundColor: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              whiteSpace: "pre-line",
+              lineHeight: 1.6,
+            }}
+          >
+            <div style={{ fontWeight: 700, color: "var(--accent-green)", marginBottom: "6px" }}>
+              🤖 Gemini AI Response:
             </div>
-          ) : (
-            <div className="spec-table">
-              <div className="spec-row">
-                <span className="spec-label">Anomaly Risk Score:</span>
-                <span className="spec-val green-text">{analysisResult.anomalyScore}</span>
-              </div>
-              <div className="spec-row">
-                <span className="spec-label">Predicted Pass Window:</span>
-                <span className="spec-val">{analysisResult.predictedPassWindow}</span>
-              </div>
-              <div className="spec-row">
-                <span className="spec-label">Subsystem Assessment:</span>
-                <span className="spec-val">{analysisResult.healthAssessment}</span>
-              </div>
-              <div className="spec-row">
-                <span className="spec-label">Downlink Link Quality:</span>
-                <span className="spec-val">{analysisResult.downlinkConfidence}</span>
-              </div>
-              <div className="spec-row">
-                <span className="spec-label">Total Diagnostics Executed:</span>
-                <span className="spec-val">{runCountRef.current} Times</span>
-              </div>
-            </div>
-          )}
-        </div>
+            <div>{chatAnswer}</div>
+          </div>
+        )}
       </div>
     </div>
   );

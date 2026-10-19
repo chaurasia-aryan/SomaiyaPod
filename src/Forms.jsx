@@ -1,167 +1,198 @@
 import React, { useState } from "react";
 
-const mockDatabaseAuth = async (username, password) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (username && password) {
-        resolve({ success: true, user: { username, role: "Operator" } });
-      } else {
-        resolve({ success: false, message: "Invalid Database Credentials" });
-      }
-    }, 1000);
+// Real Backend Login Function connected to MongoDB
+async function loginUser(username, password) {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
   });
-};
+  return await res.json();
+}
 
-function LoginForm({ onLoginSuccess }) {
+// Real Backend Registration Function connected to MongoDB
+async function registerUser(username, email, password) {
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password }),
+  });
+  return await res.json();
+}
+
+function LoginForm({ onLoginSuccess, switchToRegister }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [usernameError, setUsernameError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
-    let valid = true;
-
-    setUsernameError("");
-    setPasswordError("");
-
-    if (!username.trim()) {
-      setUsernameError("Username is required");
-      valid = false;
-    } else if (username.trim().length < 3) {
-      setUsernameError("Username must be at least 3 characters");
-      valid = false;
+    if (!username.trim() || !password) {
+      setErrorMessage("Please enter both username and password.");
+      return;
     }
 
-    if (!password) {
-      setPasswordError("Password is required");
-      valid = false;
-    } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
-      valid = false;
-    }
+    setIsSubmitting(true);
+    try {
+      const data = await loginUser(username.trim(), password);
 
-    if (valid) {
-      setIsSubmitting(true);
-      try {
-        const dbResponse = await mockDatabaseAuth(username, password);
-
-        if (dbResponse.success) {
-          onLoginSuccess();
-        } else {
-          setPasswordError(dbResponse.message);
-        }
-      } catch (err) {
-        console.error("DB Auth error:", err);
-        setPasswordError("Database connection failed. Please try again.");
-      } finally {
-        setIsSubmitting(false);
+      if (data.success) {
+        // Save token and user in localStorage
+        localStorage.setItem("somaiya_token", data.token);
+        localStorage.setItem("somaiya_user", JSON.stringify(data.user));
+        onLoginSuccess(data.user);
+      } else {
+        setErrorMessage(data.message || "Invalid credentials.");
       }
+    } catch (err) {
+      console.error("Login fetch error:", err);
+      setErrorMessage("Cannot connect to backend server. Make sure backend is running.");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleDemoFill = () => {
+    setUsername("somaiya_admin");
+    setPassword("password123");
+    setErrorMessage("");
   };
 
   return (
     <div className="form-card">
       <h2>Mission Control Login</h2>
-      <p className="form-subtitle">Enter your credentials to access telemetry</p>
+      <p className="form-subtitle">Enter your credentials to access SomaiyaPod telemetry</p>
+
+      {errorMessage && (
+        <div className="notification-banner" style={{ backgroundColor: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", marginBottom: "16px" }}>
+          {errorMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Username</label>
+          <label>Username or Email</label>
           <input
             type="text"
-            placeholder="Username (min 3 chars)"
+            placeholder="Username (e.g. somaiya_admin)"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className={usernameError ? "input-error" : ""}
             disabled={isSubmitting}
+            required
           />
-          {usernameError && <span className="error-message">{usernameError}</span>}
         </div>
 
         <div className="form-group">
           <label>Password</label>
           <input
             type="password"
-            placeholder="Password (min 6 chars)"
+            placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={passwordError ? "input-error" : ""}
             disabled={isSubmitting}
+            required
           />
-          {passwordError && <span className="error-message">{passwordError}</span>}
         </div>
 
-        <button type="submit" className="primary-btn" disabled={isSubmitting}>
-          {isSubmitting ? "Verifying DB Credentials..." : "Login & Access Dashboard"}
-        </button>
+        <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+          <button type="submit" className="primary-btn" style={{ flex: 1 }} disabled={isSubmitting}>
+            {isSubmitting ? "Authenticating..." : "Login & Access Dashboard"}
+          </button>
+          <button type="button" className="secondary-btn" onClick={handleDemoFill}>
+            Demo Operator
+          </button>
+        </div>
       </form>
+
+      <div style={{ marginTop: "18px", textAlign: "center", fontSize: "0.9rem" }}>
+        Don't have an account?{" "}
+        <button
+          type="button"
+          onClick={switchToRegister}
+          style={{ background: "none", border: "none", color: "var(--primary-blue)", fontWeight: 600, cursor: "pointer" }}
+        >
+          Register here
+        </button>
+      </div>
     </div>
   );
 }
 
-function RegistrationForm() {
-  const [fullName, setFullName] = useState("");
+function RegistrationForm({ onRegisterSuccess, switchToLogin }) {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [organization, setOrganization] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [error, setError] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
 
-    if (!fullName.trim()) {
-      setError("Full Name is required");
+    if (!username.trim() || !email.trim() || !password) {
+      setErrorMessage("Please fill out all fields.");
       return;
     }
 
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address");
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long.");
       return;
     }
 
-    if (!organization.trim()) {
-      setError("Organization is required");
-      return;
-    }
+    setIsSubmitting(true);
+    try {
+      const data = await registerUser(username.trim(), email.trim(), password);
 
-    if (!agreeTerms) {
-      setError("You must agree to the data terms");
-      return;
+      if (data.success) {
+        setSuccessMessage("Account created successfully! You are now logged in.");
+        localStorage.setItem("somaiya_token", data.token);
+        localStorage.setItem("somaiya_user", JSON.stringify(data.user));
+        setTimeout(() => {
+          onRegisterSuccess(data.user);
+        }, 1200);
+      } else {
+        setErrorMessage(data.message || "Registration failed.");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setErrorMessage("Cannot connect to backend server.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setError("");
-    setIsSubmitted(true);
   };
-
-  if (isSubmitted) {
-    return (
-      <div className="form-card success-card">
-        <h2>Data Access Request Submitted</h2>
-        <p>Your research request for SomaiyaPod telemetry has been logged.</p>
-        <button className="secondary-btn" onClick={() => setIsSubmitted(false)}>
-          Submit Another Request
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="form-card">
-      <h2>Data Request Registration</h2>
-      <p className="form-subtitle">Apply for experimental satellite telemetry access</p>
+      <h2>Create Operator Account</h2>
+      <p className="form-subtitle">Register for MongoDB-backed access to SomaiyaPod telemetry</p>
+
+      {errorMessage && (
+        <div className="notification-banner" style={{ backgroundColor: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", marginBottom: "16px" }}>
+          {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="notification-banner" style={{ backgroundColor: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0", marginBottom: "16px" }}>
+          {successMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Full Name *</label>
+          <label>Username *</label>
           <input
             type="text"
-            placeholder="Your Name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Choose username (min 3 chars)"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={isSubmitting}
+            required
           />
         </div>
 
@@ -169,39 +200,41 @@ function RegistrationForm() {
           <label>Email Address *</label>
           <input
             type="email"
-            placeholder="email@somaiya.edu"
+            placeholder="e.g. operator@somaiya.edu"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isSubmitting}
+            required
           />
         </div>
 
         <div className="form-group">
-          <label>Organization *</label>
+          <label>Password *</label>
           <input
-            type="text"
-            placeholder="Institution / Organization"
-            value={organization}
-            onChange={(e) => setOrganization(e.target.value)}
+            type="password"
+            placeholder="Min 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
+            required
           />
         </div>
 
-        <div className="form-group checkbox-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-            />
-            I agree to the Data Sharing Terms *
-          </label>
-        </div>
-
-        {error && <span className="error-message">{error}</span>}
-
-        <button type="submit" className="primary-btn">
-          Submit Request
+        <button type="submit" className="primary-btn" style={{ width: "100%", marginTop: "14px" }} disabled={isSubmitting}>
+          {isSubmitting ? "Creating MongoDB Account..." : "Register Account"}
         </button>
       </form>
+
+      <div style={{ marginTop: "18px", textAlign: "center", fontSize: "0.9rem" }}>
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={switchToLogin}
+          style={{ background: "none", border: "none", color: "var(--primary-blue)", fontWeight: 600, cursor: "pointer" }}
+        >
+          Login here
+        </button>
+      </div>
     </div>
   );
 }
@@ -216,20 +249,26 @@ function Forms({ onLoginSuccess }) {
           className={`toggle-tab ${!isRegistering ? "active" : ""}`}
           onClick={() => setIsRegistering(false)}
         >
-          Login
+          Operator Login
         </button>
         <button
           className={`toggle-tab ${isRegistering ? "active" : ""}`}
           onClick={() => setIsRegistering(true)}
         >
-          Data Request
+          Register Account
         </button>
       </div>
 
       {isRegistering ? (
-        <RegistrationForm />
+        <RegistrationForm
+          onRegisterSuccess={onLoginSuccess}
+          switchToLogin={() => setIsRegistering(false)}
+        />
       ) : (
-        <LoginForm onLoginSuccess={onLoginSuccess} />
+        <LoginForm
+          onLoginSuccess={onLoginSuccess}
+          switchToRegister={() => setIsRegistering(true)}
+        />
       )}
     </div>
   );

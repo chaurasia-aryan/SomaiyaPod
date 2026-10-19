@@ -15,7 +15,7 @@ const API_Integration = () => {
 
     try {
       const response = await fetch(
-        `/api/rest/v1/satellite/positions/25544/41.702/-76.014/0/2/&apiKey=${keyToUse}`
+        `/n2yo/rest/v1/satellite/positions/25544/41.702/-76.014/0/2/&apiKey=${keyToUse}`
       );
       const json = await response.json();
 

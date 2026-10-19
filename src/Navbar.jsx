@@ -1,14 +1,15 @@
 import React from "react";
 
-function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
+function Navbar({ title, activePage, setActivePage, isLoggedIn, currentUser, onLogout }) {
   return (
     <nav className="navbar">
       <div className="navbar-container">
         <div 
           className="navbar-brand" 
           onClick={() => setActivePage("dashboard")} 
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
         >
+          <span style={{ fontSize: "1.3rem" }}>🛰️</span>
           <span className="navbar-logo">{title}</span>
         </div>
 
@@ -24,10 +25,19 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
 
           <li>
             <button
-              className={`nav-link ${activePage === "live-api" ? "active" : ""}`}
-              onClick={() => setActivePage("live-api")}
+              className={`nav-link ${activePage === "data" ? "active" : ""}`}
+              onClick={() => setActivePage("data")}
             >
-              Live API Tracker
+              📊 Telemetry Data
+            </button>
+          </li>
+
+          <li>
+            <button
+              className={`nav-link ${activePage === "charts" ? "active" : ""}`}
+              onClick={() => setActivePage("charts")}
+            >
+              📈 Graphs &amp; Charts
             </button>
           </li>
 
@@ -36,16 +46,16 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
               className={`nav-link ${activePage === "ai" ? "active" : ""}`}
               onClick={() => setActivePage("ai")}
             >
-              AI Diagnostics
+              ✨ AI (Gemini)
             </button>
           </li>
 
           <li>
             <button
-              className={`nav-link ${activePage === "request" ? "active" : ""}`}
-              onClick={() => setActivePage("request")}
+              className={`nav-link ${activePage === "live-api" ? "active" : ""}`}
+              onClick={() => setActivePage("live-api")}
             >
-              Data Request
+              Live API Tracker
             </button>
           </li>
 
@@ -59,14 +69,19 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, onLogout }) {
           </li>
         </ul>
 
-        <div className="navbar-actions">
+        <div className="navbar-actions" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {isLoggedIn ? (
-            <button className="logout-btn" onClick={onLogout}>
-              Logout
-            </button>
+            <>
+              <span className="user-profile-badge">
+                👤 {currentUser?.username || "Operator"}
+              </span>
+              <button className="logout-btn" onClick={onLogout}>
+                Logout
+              </button>
+            </>
           ) : (
-            <button className="login-nav-btn" onClick={() => setActivePage("dashboard")}>
-              Login
+            <button className="login-nav-btn" onClick={() => setActivePage("auth")}>
+              Login / Register
             </button>
           )}
         </div>
