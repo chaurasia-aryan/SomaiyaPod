@@ -193,10 +193,9 @@ function App() {
                 onClick={() => setActivePage("data")}
                 style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
               >
-                <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>📊</div>
-                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Telemetry Data Tab</div>
+                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Telemetry Data</div>
                 <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                  View MongoDB records, fetch live API &amp; manage entries.
+                  View MongoDB records, fetch live API and manage entries.
                 </div>
               </button>
 
@@ -205,7 +204,6 @@ function App() {
                 onClick={() => setActivePage("charts")}
                 style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
               >
-                <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>📈</div>
                 <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Graphs &amp; Charts</div>
                 <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
                   Visual trends for battery, temperature, altitude and speed.
@@ -217,10 +215,9 @@ function App() {
                 onClick={() => setActivePage("ai")}
                 style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
               >
-                <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>✨</div>
                 <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Gemini AI Diagnostics</div>
                 <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                  Deep anomaly detection, health reports &amp; interactive AI chat.
+                  Deep anomaly detection, health reports and interactive AI chat.
                 </div>
               </button>
 
@@ -229,7 +226,6 @@ function App() {
                 onClick={() => setActivePage("live-api")}
                 style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
               >
-                <div style={{ fontSize: "1.4rem", marginBottom: "6px" }}>🛰️</div>
                 <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Live API Tracker</div>
                 <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
                   Real-time orbital tracking via external satellite endpoints.

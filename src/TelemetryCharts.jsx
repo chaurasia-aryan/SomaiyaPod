@@ -243,7 +243,7 @@ function TelemetryCharts() {
       {/* Charts Grid */}
       <div className="charts-grid">
         <SimpleLineChart
-          title="🔋 Battery Power (%) Curve"
+          title="Battery Power (%) Curve"
           data={records}
           dataKey="battery"
           unit="%"
@@ -254,7 +254,7 @@ function TelemetryCharts() {
         />
 
         <SimpleLineChart
-          title="🌡️ Thermal System Temperature (°C)"
+          title="Thermal System Temperature (°C)"
           data={records}
           dataKey="temperature"
           unit="°C"
@@ -263,7 +263,7 @@ function TelemetryCharts() {
         />
 
         <SimpleLineChart
-          title="🛰️ Orbital Altitude (km)"
+          title="Orbital Altitude (km)"
           data={records}
           dataKey="altitude"
           unit="km"
@@ -272,7 +272,7 @@ function TelemetryCharts() {
         />
 
         <SimpleLineChart
-          title="⚡ Pod Velocity (km/h)"
+          title="Pod Velocity (km/h)"
           data={records}
           dataKey="speed"
           unit="km/h"

@@ -77,6 +77,26 @@ function DataTab() {
     }
   };
 
+  // Load JSON file data using Core Node.js fs module
+  const handleLoadFileData = async () => {
+    setLoading(true);
+    setActionMessage("Reading telemetry.json using Core Node.js fs module...");
+    try {
+      const res = await fetch("/api/telemetry/file-based");
+      const data = await res.json();
+      if (data.success) {
+        setTelemetryList(data.data);
+        setActionMessage(`Loaded ${data.count} records from JSON file using fs.readFile`);
+      }
+    } catch (err) {
+      console.error("FS Read error:", err);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setActionMessage(""), 5000);
+    }
+  };
+
+
   // 3. Delete a record from MongoDB
   const handleDeleteRecord = async (id) => {
     try {
@@ -140,33 +160,41 @@ function DataTab() {
           </p>
         </div>
 
-        <div className="flex-between" style={{ gap: "8px" }}>
+        <div className="flex-between" style={{ gap: "8px", flexWrap: "wrap" }}>
           <button
             className="primary-btn"
             onClick={handleFetchFromLiveAPI}
             disabled={loading}
           >
-            {loading ? "Syncing..." : "🛰️ Fetch & Save Live API"}
+            {loading ? "Syncing..." : "Fetch & Save Live API"}
           </button>
           <button
             className="secondary-btn"
             onClick={handleSeedData}
             disabled={loading}
           >
-            ⚡ Seed Sample Data
+            Seed Sample Data
+          </button>
+          <button
+            className="secondary-btn"
+            onClick={handleLoadFileData}
+            disabled={loading}
+            title="Demonstrate Core Node.js fs module reading JSON"
+          >
+            Load File Data (fs)
           </button>
           <button
             className="secondary-btn"
             onClick={() => setShowAddForm(!showAddForm)}
           >
-            {showAddForm ? "Close Form" : "➕ Add Custom Data"}
+            {showAddForm ? "Close Form" : "Add Custom Data"}
           </button>
           <button
             className="secondary-btn"
             onClick={fetchTelemetryData}
             title="Refresh Table"
           >
-            🔄 Refresh
+            Refresh
           </button>
         </div>
       </div>

@@ -9,7 +9,6 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, currentUser, onL
           onClick={() => setActivePage("dashboard")} 
           style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
         >
-          <span style={{ fontSize: "1.3rem" }}>🛰️</span>
           <span className="navbar-logo">{title}</span>
         </div>
 
@@ -28,7 +27,7 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, currentUser, onL
               className={`nav-link ${activePage === "data" ? "active" : ""}`}
               onClick={() => setActivePage("data")}
             >
-              📊 Telemetry Data
+              Telemetry Data
             </button>
           </li>
 
@@ -37,7 +36,7 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, currentUser, onL
               className={`nav-link ${activePage === "charts" ? "active" : ""}`}
               onClick={() => setActivePage("charts")}
             >
-              📈 Graphs &amp; Charts
+              Graphs &amp; Charts
             </button>
           </li>
 
@@ -46,7 +45,7 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, currentUser, onL
               className={`nav-link ${activePage === "ai" ? "active" : ""}`}
               onClick={() => setActivePage("ai")}
             >
-              ✨ AI (Gemini)
+              AI Diagnostics
             </button>
           </li>
 
@@ -73,7 +72,7 @@ function Navbar({ title, activePage, setActivePage, isLoggedIn, currentUser, onL
           {isLoggedIn ? (
             <>
               <span className="user-profile-badge">
-                👤 {currentUser?.username || "Operator"}
+                {currentUser?.username || "Operator"}
               </span>
               <button className="logout-btn" onClick={onLogout}>
                 Logout
