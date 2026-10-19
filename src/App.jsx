@@ -8,24 +8,12 @@ import AIPredictor from "./AIPredictor";
 import DataTab from "./DataTab";
 import TelemetryCharts from "./TelemetryCharts";
 
-function TelemetryCard({ title, value, subtext, statusColor }) {
-  return (
-    <div className="card telemetry-card">
-      <div className="card-title">{title}</div>
-      <div className="card-value">{value}</div>
-      {subtext && (
-        <div className={`card-subtext ${statusColor ? statusColor : ""}`}>
-          {subtext}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activePage, setActivePage] = useState("dashboard");
+  const [actionLoading, setActionLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   // Telemetry metrics from MongoDB
   const [metrics, setMetrics] = useState({
@@ -78,6 +66,48 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  // Fast action: Sync external live satellite API
+  const handleSyncISS = async () => {
+    setActionLoading(true);
+    setStatusMessage("Querying live orbital tracking API...");
+    try {
+      const res = await fetch("/api/external/fetch-and-save");
+      const result = await res.json();
+      if (result.success) {
+        setStatusMessage(`Live satellite data synchronized: ${result.data.podId}`);
+        await refreshLatestTelemetry();
+      } else {
+        setStatusMessage("Failed to ingest external satellite data.");
+      }
+    } catch (err) {
+      setStatusMessage("Error communicating with satellite ingestion service.");
+    } finally {
+      setActionLoading(false);
+      setTimeout(() => setStatusMessage(""), 4000);
+    }
+  };
+
+  // Fast action: Seed sample flight telemetry
+  const handleSeedData = async () => {
+    setActionLoading(true);
+    setStatusMessage("Injecting flight telemetry sequence into MongoDB...");
+    try {
+      const res = await fetch("/api/telemetry/seed", { method: "POST" });
+      const result = await res.json();
+      if (result.success) {
+        setStatusMessage(`Telemetry seeded (${result.count} records inserted).`);
+        await refreshLatestTelemetry();
+      } else {
+        setStatusMessage("Failed to seed telemetry records.");
+      }
+    } catch (err) {
+      setStatusMessage("Error triggering telemetry seed endpoint.");
+    } finally {
+      setActionLoading(false);
+      setTimeout(() => setStatusMessage(""), 4000);
+    }
+  };
+
   const handleLoginSuccess = (userData) => {
     setCurrentUser(userData);
     setIsLoggedIn(true);
@@ -93,7 +123,6 @@ function App() {
   };
 
   const renderContent = () => {
-    // If not logged in and on auth page or trying to access dashboard directly without login
     if (!isLoggedIn && activePage === "auth") {
       return <Forms onLoginSuccess={handleLoginSuccess} />;
     }
@@ -121,116 +150,204 @@ function App() {
       default:
         return (
           <div className="dashboard-container">
-            <div className="dashboard-header flex-between">
-              <div>
-                <h2>SomaiyaPod Mission Control</h2>
-                <p className="subtitle">
-                  Autonomous Telemetry &amp; Gemini AI Ground Station &middot; MongoDB Synced
-                </p>
+            {/* Mission Station Status Ribbon */}
+            <div className="telemetry-ribbon">
+              <div className="ribbon-metrics">
+                <div className="ribbon-item">
+                  <span className="ribbon-label">Target:</span>
+                  <span className="ribbon-val">{metrics.podId || "SomaiyaPod-01"}</span>
+                </div>
+                <div className="ribbon-item">
+                  <span className="ribbon-label">Link Status:</span>
+                  <span className="ribbon-val" style={{ color: metrics.status === "Nominal" ? "var(--status-nominal)" : "var(--status-warning)" }}>
+                    {metrics.status || "Nominal"}
+                  </span>
+                </div>
+                <div className="ribbon-item">
+                  <span className="ribbon-label">Battery:</span>
+                  <span className="ribbon-val">{metrics.battery}%</span>
+                </div>
+                <div className="ribbon-item">
+                  <span className="ribbon-label">Thermal:</span>
+                  <span className="ribbon-val">{metrics.temperature} C</span>
+                </div>
+                <div className="ribbon-item">
+                  <span className="ribbon-label">Altitude:</span>
+                  <span className="ribbon-val">{metrics.altitude} km</span>
+                </div>
               </div>
-              <div className="status-badge green-badge">
-                ● Telemetry Stream Online
+
+              {/* Fast Action Buttons for Scientists */}
+              <div className="ribbon-controls">
+                <button
+                  className="action-btn"
+                  onClick={refreshLatestTelemetry}
+                  disabled={actionLoading}
+                  title="Query MongoDB for newest telemetry packet"
+                >
+                  Refresh
+                </button>
+                <button
+                  className="action-btn"
+                  onClick={handleSyncISS}
+                  disabled={actionLoading}
+                  title="Query live orbital API and save to database"
+                >
+                  Sync ISS Tracker
+                </button>
+                <button
+                  className="action-btn btn-dark"
+                  onClick={handleSeedData}
+                  disabled={actionLoading}
+                  title="Seed 12 simulated flight packets"
+                >
+                  Seed Test Data
+                </button>
               </div>
             </div>
 
+            {statusMessage && (
+              <div className="notification-banner">
+                {statusMessage}
+              </div>
+            )}
+
             {!isLoggedIn && (
               <div className="notification-banner" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>🔒 You are browsing in Guest Mode. Login to save records and configure AI.</span>
-                <button className="primary-btn" style={{ padding: "4px 12px", fontSize: "0.85rem" }} onClick={() => setActivePage("auth")}>
-                  Login / Register
+                <span>Notice: Operating in Guest Mode. Sign in with operator credentials to write or purge data.</span>
+                <button className="action-btn" style={{ fontSize: "0.75rem", padding: "3px 8px" }} onClick={() => setActivePage("auth")}>
+                  Sign In
                 </button>
               </div>
             )}
 
-            <h3 className="section-title">Live Satellite / Pod Telemetry</h3>
-
-            <div className="card-grid">
-              <TelemetryCard
-                title="Active Pod / Target"
-                value={metrics.podId || "SomaiyaPod-01"}
-                subtext="NORAD Tracked"
-              />
-
-              <TelemetryCard
-                title="System Status"
-                value={metrics.status || "Nominal"}
-                subtext="Telemetry link active"
-                statusColor={metrics.status === "Nominal" ? "green-text" : "warning-text"}
-              />
-
-              <TelemetryCard
-                title="Battery Power"
-                value={`${metrics.battery}%`}
-                subtext={metrics.battery > 70 ? "Solar Cells Nominal" : "Low Power Mode"}
-                statusColor={metrics.battery > 70 ? "green-text" : "warning-text"}
-              />
-
-              <TelemetryCard
-                title="Onboard Temperature"
-                value={`${metrics.temperature} °C`}
-                subtext="Thermal Loop Nominal"
-                statusColor="green-text"
-              />
-
-              <TelemetryCard
-                title="Orbital Altitude"
-                value={`${metrics.altitude} km`}
-                subtext="LEO Pass Window"
-              />
-
-              <TelemetryCard
-                title="Pod Velocity"
-                value={`${metrics.speed || 27500} km/h`}
-                subtext="Orbital Velocity"
-              />
+            {/* Scientific Instrument Matrix (6-Card Telemetry Grid) */}
+            <div className="page-header" style={{ marginTop: "10px" }}>
+              <h2>Active Telemetry Matrix</h2>
+              <p className="subtitle">High-frequency sensor downlinks recorded in MongoDB</p>
             </div>
 
-            {/* Quick Navigation Action Cards */}
-            <h3 className="section-title">System Modules &amp; AI Tools</h3>
-            <div className="quick-actions-bar" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px", marginTop: "12px" }}>
-              <button
-                className="card action-nav-card"
-                onClick={() => setActivePage("data")}
-                style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
-              >
-                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Telemetry Data</div>
-                <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                  View MongoDB records, fetch live API and manage entries.
+            <div className="telemetry-matrix">
+              <div className="instrument-card">
+                <div className="instrument-header">
+                  <span className="instrument-label">Target ID</span>
+                  <span className="instrument-badge">LEO</span>
                 </div>
-              </button>
+                <div className="instrument-value" style={{ fontSize: "1.45rem" }}>
+                  {metrics.podId || "SomaiyaPod-01"}
+                </div>
+                <div className="instrument-subtext">Active Ground Tracking</div>
+              </div>
 
-              <button
-                className="card action-nav-card"
-                onClick={() => setActivePage("charts")}
-                style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
-              >
-                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Graphs &amp; Charts</div>
-                <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                  Visual trends for battery, temperature, altitude and speed.
+              <div className="instrument-card">
+                <div className="instrument-header">
+                  <span className="instrument-label">Health Status</span>
+                  <span className="instrument-badge" style={{ color: metrics.status === "Nominal" ? "var(--text-main)" : "var(--status-warning)" }}>
+                    {metrics.status}
+                  </span>
                 </div>
-              </button>
+                <div className="instrument-value">
+                  {metrics.status || "Nominal"}
+                </div>
+                <div className="instrument-subtext">Automated Threshold Evaluation</div>
+              </div>
 
-              <button
-                className="card action-nav-card"
-                onClick={() => setActivePage("ai")}
-                style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
-              >
-                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Gemini AI Diagnostics</div>
-                <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                  Deep anomaly detection, health reports and interactive AI chat.
+              <div className="instrument-card">
+                <div className="instrument-header">
+                  <span className="instrument-label">Battery Power</span>
+                  <span className="instrument-badge">Main Bus</span>
                 </div>
-              </button>
+                <div className="instrument-value">
+                  {metrics.battery}%
+                </div>
+                <div className="mini-gauge">
+                  <div className="mini-gauge-fill" style={{ width: `${Math.min(100, Math.max(0, metrics.battery))}%` }}></div>
+                </div>
+                <div className="instrument-subtext" style={{ marginTop: "6px" }}>
+                  {metrics.battery > 70 ? "Solar Cells Optimal" : "Low Power Reserve"}
+                </div>
+              </div>
 
-              <button
-                className="card action-nav-card"
-                onClick={() => setActivePage("live-api")}
-                style={{ textAlign: "left", cursor: "pointer", padding: "16px" }}
-              >
-                <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>Live API Tracker</div>
-                <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "4px" }}>
-                  Real-time orbital tracking via external satellite endpoints.
+              <div className="instrument-card">
+                <div className="instrument-header">
+                  <span className="instrument-label">Thermal System</span>
+                  <span className="instrument-badge">Sensor T-1</span>
                 </div>
-              </button>
+                <div className="instrument-value">
+                  {metrics.temperature} C
+                </div>
+                <div className="instrument-subtext">Cooling Loop Nominal</div>
+              </div>
+
+              <div className="instrument-card">
+                <div className="instrument-header">
+                  <span className="instrument-label">Orbital Altitude</span>
+                  <span className="instrument-badge">GPS Alt</span>
+                </div>
+                <div className="instrument-value">
+                  {metrics.altitude} km
+                </div>
+                <div className="instrument-subtext">Low Earth Orbit Trajectory</div>
+              </div>
+
+              <div className="instrument-card">
+                <div className="instrument-header">
+                  <span className="instrument-label">Velocity</span>
+                  <span className="instrument-badge">Relative</span>
+                </div>
+                <div className="instrument-value">
+                  {Number(metrics.speed || 27500).toLocaleString()} km/h
+                </div>
+                <div className="instrument-subtext">Orbital Ground Speed</div>
+              </div>
+            </div>
+
+            {/* Quick Scientific Modules Navigation Grid */}
+            <div className="page-header" style={{ marginTop: "24px" }}>
+              <h2>Mission Control Subsystems</h2>
+              <p className="subtitle">Direct navigation to ground station operations, analysis, and data layers</p>
+            </div>
+
+            <div className="action-grid">
+              <div className="action-tool-card" onClick={() => setActivePage("data")}>
+                <div>
+                  <div className="action-tool-title">Telemetry Data Engine</div>
+                  <div className="action-tool-desc">
+                    Direct access to MongoDB telemetry records. Perform CRUD queries, filter by threshold status, or purge records.
+                  </div>
+                </div>
+                <div className="action-tool-link">Open Telemetry Records &rarr;</div>
+              </div>
+
+              <div className="action-tool-card" onClick={() => setActivePage("charts")}>
+                <div>
+                  <div className="action-tool-title">Graphs &amp; Metric Curves</div>
+                  <div className="action-tool-desc">
+                    Time-series visualization for voltage discharge, temperature equilibrium, and altitude trajectory.
+                  </div>
+                </div>
+                <div className="action-tool-link">Open Visual Analytics &rarr;</div>
+              </div>
+
+              <div className="action-tool-card" onClick={() => setActivePage("ai")}>
+                <div>
+                  <div className="action-tool-title">Gemini AI Diagnostics</div>
+                  <div className="action-tool-desc">
+                    Generative AI health evaluation with telemetry anomaly detection, operational summaries, and engineering Q&amp;A.
+                  </div>
+                </div>
+                <div className="action-tool-link">Launch AI Assistant &rarr;</div>
+              </div>
+
+              <div className="action-tool-card" onClick={() => setActivePage("live-api")}>
+                <div>
+                  <div className="action-tool-title">Orbital Satellite Tracker</div>
+                  <div className="action-tool-desc">
+                    Real-time external satellite positioning API integration pulling live orbital passes with automated fallbacks.
+                  </div>
+                </div>
+                <div className="action-tool-link">Track Orbital Position &rarr;</div>
+              </div>
             </div>
           </div>
         );
@@ -240,7 +357,7 @@ function App() {
   return (
     <div className="app-container">
       <Navbar
-        title="SomaiyaPod Mission Control"
+        title="SomaiyaPod Ground Station"
         activePage={activePage}
         setActivePage={setActivePage}
         isLoggedIn={isLoggedIn}

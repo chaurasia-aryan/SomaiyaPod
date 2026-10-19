@@ -206,7 +206,7 @@ function TelemetryCharts() {
 
         <div className="flex-between" style={{ gap: "10px" }}>
           <button className="primary-btn" onClick={fetchChartData} disabled={loading}>
-            {loading ? "Refreshing..." : "🔄 Refresh Charts"}
+            {loading ? "Refreshing..." : "Refresh Charts"}
           </button>
         </div>
       </div>

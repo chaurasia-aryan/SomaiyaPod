@@ -44,7 +44,7 @@ function FormattedReport({ text }) {
           return <hr key={idx} style={{ margin: "14px 0", border: "none", borderTop: "1px solid var(--border-color)" }} />;
         }
 
-        if (trimmed.startsWith("*(💡") || trimmed.startsWith("(💡")) {
+        if (trimmed.startsWith("*(Note:") || trimmed.startsWith("(Note:") || trimmed.includes("Note:")) {
           return (
             <div key={idx} className="notification-banner" style={{ margin: "14px 0", fontSize: "0.85rem" }}>
               {renderInlineFormatting(trimmed.replace(/^\*\(|\)\*$/g, ""))}
@@ -145,7 +145,7 @@ function AIPredictor() {
           onClick={runGeminiAnalysis}
           disabled={isAnalyzing}
         >
-          {isAnalyzing ? "Analyzing with Gemini..." : "✨ Run Gemini Diagnostics"}
+          {isAnalyzing ? "Analyzing with Gemini..." : "Run Gemini Diagnostics"}
         </button>
       </div>
 
@@ -173,7 +173,7 @@ function AIPredictor() {
 
       {/* Gemini Chat Question Section */}
       <div className="card" style={{ marginTop: "20px" }}>
-        <h3>💬 Ask Gemini AI Flight Engineer</h3>
+        <h3>Ask Gemini AI Flight Engineer</h3>
         <p className="form-subtitle" style={{ marginBottom: "14px" }}>
           Ask any question about SomaiyaPod health, battery life, orbital decay, or sensor anomalies.
         </p>
@@ -225,14 +225,14 @@ function AIPredictor() {
             className="card"
             style={{
               marginTop: "16px",
-              backgroundColor: "#f0fdf4",
-              border: "1px solid #bbf7d0",
+              backgroundColor: "var(--bg-subtle)",
+              border: "1px solid var(--border-light)",
               whiteSpace: "pre-line",
               lineHeight: 1.6,
             }}
           >
-            <div style={{ fontWeight: 700, color: "var(--accent-green)", marginBottom: "6px" }}>
-              🤖 Gemini AI Response:
+            <div style={{ fontWeight: 700, color: "var(--text-main)", marginBottom: "6px" }}>
+              Gemini AI Response:
             </div>
             <div>{chatAnswer}</div>
           </div>

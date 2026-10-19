@@ -369,7 +369,7 @@ function DataTab() {
                           title="Delete record from MongoDB"
                           onClick={() => handleDeleteRecord(item._id)}
                         >
-                          ✕
+                          Del
                         </button>
                       </td>
                     </tr>
