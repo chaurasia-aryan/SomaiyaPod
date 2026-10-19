@@ -1,16 +1,45 @@
-# React + Vite
+# SomaiyaPod Mission Control
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Full-stack mission control and telemetry monitoring platform for SomaiyaPod.
 
-Currently, two official plugins are available:
+## Tech Stack
+- Frontend: React, Vite, Chart.js / Recharts, Lucide Icons
+- Backend: Node.js, Express, MongoDB (Mongoose), JWT, Bcrypt
+- Intelligence: Google Gemini API (gemini-3.8-flash)
+- Real-time Data: WhereTheISS.at Public API / Ground Station Simulation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Project Structure
+```text
+SomaiyaPod/
+|-- backend/               # Express + MongoDB backend
+|   |-- models/            # Mongoose schemas (User, Telemetry)
+|   |-- routes/            # API endpoints (auth, telemetry, external, ai)
+|   |-- db.js              # MongoDB database connection
+|   |-- server.js          # Express app entry point
+|   `-- package.json       # Backend dependencies
+|-- src/                   # React frontend application
+|   |-- App.jsx            # Main dashboard shell
+|   |-- AIPredictor.jsx    # Gemini AI diagnostics and chat interface
+|   |-- API_Intergration.jsx # Live external feed panel
+|   |-- TelemetryCharts.jsx# Real-time charts
+|   `-- DataTab.jsx        # Telemetry database viewer
+`-- package.json           # Frontend dependencies
+```
 
-## React Compiler
+## Running Locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Backend Setup
+```bash
+cd backend
+npm install
+npm run dev
+```
+Runs on: `http://localhost:5000`
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+### 2. Frontend Setup
+In the project root directory:
+```bash
+npm install
+npm run dev
+```
+Runs on: `http://localhost:5173`

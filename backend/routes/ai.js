@@ -18,7 +18,7 @@ function generateLocalDiagnostics(records) {
   const isTempHigh = latest.temperature > 45;
   const risk = isBatteryLow || isTempHigh ? "Moderate Risk (Caution)" : "Low Risk (Optimal)";
 
-  return `### 🛰️ SomaiyaPod AI Diagnostics Report (Automated)
+  return `### SomaiyaPod AI Diagnostics Report (Automated)
 
 **1. Subsystem Health Assessment:**
 - Overall Status: **${latest.status}**
@@ -36,7 +36,8 @@ function generateLocalDiagnostics(records) {
 - Keep passive thermal radiator pointed away from direct solar radiation.
 
 ---
-*(💡 Tip: Add your **GEMINI_API_KEY** in \`backend/.env\` to activate live Google Gemini 1.5/2.5 AI generation!)*`;
+*(Note: Add your GEMINI_API_KEY in backend/.env to activate live Google Gemini AI generation)*`;
+
 }
 
 // 1. ANALYZE TELEMETRY DATA WITH GEMINI AI

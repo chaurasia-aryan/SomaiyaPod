@@ -20,8 +20,11 @@ dist-ssr
 # Environment variables & secrets
 .env
 .env.*
+!.env.example
 *.env
 backend/.env
+!backend/.env.example
+
 
 # Editor directories and files
 .vscode/*
