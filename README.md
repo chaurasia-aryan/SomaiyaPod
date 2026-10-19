@@ -1,30 +1,49 @@
-# SomaiyaPod Mission Control
+# SomaiyaPod Mission Control Ground Station
 
-Full-stack mission control and telemetry monitoring platform for SomaiyaPod.
+Full-stack spacecraft mission control and telemetry monitoring workstation for SomaiyaPod.
 
 ## Tech Stack
-- Frontend: React, Vite, Chart.js / Recharts, Lucide Icons
-- Backend: Node.js, Express, MongoDB (Mongoose), JWT, Bcrypt
-- Intelligence: Google Gemini API (gemini-3.8-flash)
-- Real-time Data: WhereTheISS.at Public API / Ground Station Simulation
+- **Frontend**: React 19, Vite, Vanilla CSS Design System (Scientific Workstation UI)
+- **Backend**: Node.js, Express.js, MongoDB (Mongoose)
+- **Intelligence**: Google Gemini AI (`gemini-3.8-flash`) with offline heuristic diagnostics
+- **External Feeds**: WhereTheISS.at Public Satellite API with orbital physics fallback
 
-## Project Structure
+---
+
+## Clean Project Structure
 ```text
 SomaiyaPod/
-|-- backend/               # Express + MongoDB backend
-|   |-- models/            # Mongoose schemas (User, Telemetry)
-|   |-- routes/            # API endpoints (auth, telemetry, external, ai)
-|   |-- db.js              # MongoDB database connection
-|   |-- server.js          # Express app entry point
-|   `-- package.json       # Backend dependencies
-|-- src/                   # React frontend application
-|   |-- App.jsx            # Main dashboard shell
-|   |-- AIPredictor.jsx    # Gemini AI diagnostics and chat interface
-|   |-- API_Intergration.jsx # Live external feed panel
-|   |-- TelemetryCharts.jsx# Real-time charts
-|   `-- DataTab.jsx        # Telemetry database viewer
-`-- package.json           # Frontend dependencies
+├── backend/                   # Node.js + Express + MongoDB Backend
+│   ├── models/                # Mongoose Models (User, Telemetry)
+│   ├── routes/                # RESTful Express Routers (auth, telemetry, externalApi, ai)
+│   ├── db.js                  # Direct MongoDB Connection Manager
+│   ├── server.js              # Express Server, Middleware & Route Mounts
+│   ├── vercel.json            # Vercel Serverless Function Config
+│   ├── .env.example           # Backend Environment Variables Template
+│   └── package.json           # Backend Dependencies
+│
+├── frontend/                  # React + Vite Scientific Dashboard
+│   ├── public/                # Static assets and icons
+│   ├── src/                   # React Components & Views
+│   │   ├── App.jsx            # Main Ground Station Shell & Ribbon Bar
+│   │   ├── Navbar.jsx         # Station Navigation Strip
+│   │   ├── DataTab.jsx        # Telemetry Data CRUD Table
+│   │   ├── TelemetryCharts.jsx# High-Density Sensor Graphs & Metrics
+│   │   ├── AIPredictor.jsx    # Gemini AI Flight Diagnostics & Engineering Assistant
+│   │   ├── API_Intergration.jsx # Live Satellite Tracker Panel
+│   │   ├── Forms.jsx          # Mission Operator Authentication Form
+│   │   └── MissionInfo.jsx    # Ground Station Architecture Information
+│   ├── index.html             # HTML5 Entry Point
+│   ├── vite.config.js         # Vite Bundler Configuration
+│   └── package.json           # Frontend Dependencies
+│
+├── division.md                # 3-Person Project Division & Viva Guide
+├── README.md                  # Project Overview & Setup Instructions
+├── package.json               # Root Orchestrator Scripts
+└── .gitignore                 # Comprehensive Git Ignore Rules
 ```
+
+---
 
 ## Running Locally
 
@@ -34,12 +53,29 @@ cd backend
 npm install
 npm run dev
 ```
-Runs on: `http://localhost:5000`
+Backend runs on: `http://localhost:5000`
 
 ### 2. Frontend Setup
-In the project root directory:
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
-Runs on: `http://localhost:5173`
+Frontend runs on: `http://localhost:5173`
+
+### 3. Root Orchestration (From Root Directory)
+```bash
+# Start Frontend
+npm run dev:frontend
+
+# Start Backend
+npm run dev:backend
+
+# Build Frontend Bundle
+npm run build
+```
+
+---
+
+## Viva Documentation
+For viva preparation, problem statements, and examiner Q&A walkthroughs, see [`division.md`](./division.md).
