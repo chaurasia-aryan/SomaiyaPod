@@ -27,6 +27,21 @@ app.use("/api/telemetry", telemetryRoutes);
 app.use("/api/external", externalRoutes);
 app.use("/api/ai", aiRoutes);
 
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({
+    project: "SomaiyaPod Mission Control Ground Station API",
+    status: "online",
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      telemetry: "/api/telemetry",
+      external: "/api/external",
+      ai: "/api/ai",
+    },
+  });
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
@@ -35,6 +50,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

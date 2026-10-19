@@ -1,4 +1,4 @@
-# SomaiyaPod - Backend Project Division and Viva Guide
+make install-antigravitymake install-antigravity# SomaiyaPod - Backend Project Division and Viva Guide
 
 This document defines the formal division of the SomaiyaPod mission control backend project equally among three students. Each student owns an independent, full-fledged subsystem accompanied by an engineering Problem Statement (PS), detailed implementation breakdown, and comprehensive viva preparation answers. The implementation is purposefully kept clean, standard, and believable for undergraduate academic evaluation.
 

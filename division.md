@@ -1,6 +1,6 @@
 # SomaiyaPod - Backend Project Division and Viva Guide
 
-This document defines the formal division of the SomaiyaPod mission control backend project equally among three students. Each student owns an independent, full-fledged subsystem accompanied by an engineering Problem Statement (PS), detailed implementation breakdown, and comprehensive viva preparation answers. The implementation is purposefully kept clean, standard, and believable for undergraduate academic evaluation.
+This document defines the formal division of the SomaiyaPod mission control backend project equally among three students. Each student owns an independent, full-fledged subsystem accompanied by a formal engineering Problem Statement (PS), detailed implementation breakdown, and comprehensive viva preparation answers.
 
 ---
 
@@ -18,16 +18,16 @@ This document defines the formal division of the SomaiyaPod mission control back
 
 | Student | Assigned Subsystem | Formal Problem Statement (PS) | Owned Files |
 | :--- | :--- | :--- | :--- |
-| **Person 1** | **User Authentication & Operator Profile Subsystem** | **PS 1**: Design, implement, and validate a secure, lightweight mission operator authentication and authorization backend service using Node.js, Express.js, and MongoDB to manage operator onboarding, credential verification, and sanitized profile delivery. | `backend/models/User.js`<br>`backend/routes/auth.js` |
-| **Person 2** | **Telemetry Ingestion, Dynamic Routing & Analytics Subsystem** | **PS 2**: Develop a high-throughput RESTful telemetry processing engine in Express.js and Mongoose to handle full CRUD operations on multi-parameter spacecraft downlink records, dynamic record lookups (`/:id`), autonomous operational status tagging, and statistical aggregation. | `backend/models/Telemetry.js`<br>`backend/routes/telemetry.js` |
-| **Person 3** | **Core Server Infrastructure, Satellite Ingestion & Gemini AI Subsystem** | **PS 3**: Architect the central Express application framework and MongoDB connectivity, build a fault-tolerant live orbital satellite ingestion pipeline interfacing with external REST APIs, and integrate Google Gemini AI for automated telemetry diagnostics. | `backend/server.js`<br>`backend/db.js`<br>`backend/routes/externalApi.js`<br>`backend/routes/ai.js`<br>`backend/.env.example` |
+| **Person 1** | **User Authentication & Operator Profile Subsystem** | **PS 1**: Design and implement a user authentication and session management feature within the application that enables mission operators to register, verify credentials, and log into the system using interactive forms with client-side and server-side validation. Upon submission, the system should validate the key credential format and authentication status, execute a request to verify the user against MongoDB, and dynamically render the operator profile and authorized dashboard view on the screen with proper error handling and status indicators. | `backend/models/User.js`<br>`backend/routes/auth.js` |
+| **Person 2** | **Telemetry Ingestion, Dynamic Routing & Analytics Subsystem** | **PS 2**: Design and implement a telemetry data management and analytics feature within the application that enables flight operators to log, query, and purge spacecraft sensor records using an interactive telemetry control interface with client-side and server-side validation. Upon submission, the system should validate the sensor payload values and threshold status, execute requests to perform CRUD operations and compute statistical metrics on MongoDB collections, and dynamically render real-time telemetry tables, gauges, and health indicators on the screen with proper error handling and status indicators. | `backend/models/Telemetry.js`<br>`backend/routes/telemetry.js` |
+| **Person 3** | **Core Server Infrastructure, Satellite Ingestion & Gemini AI Subsystem** | **PS 3**: Design and implement an API integration and artificial intelligence diagnostic feature within the application that enables users to connect external satellite tracking feeds and submit their Gemini AI API key using an interactive configuration form with client-side and server-side validation. Upon submission, the system should validate the key's format and authentication status, execute a request to fetch relevant orbital data from the target Web API or generate AI telemetry diagnostics, and dynamically render the retrieved orbital telemetry and flight briefings on the screen with proper error handling, timeout fallbacks, and status indicators. | `backend/server.js`<br>`backend/db.js`<br>`backend/routes/externalApi.js`<br>`backend/routes/ai.js`<br>`backend/.env.example`<br>`backend/vercel.json` |
 
 ---
 
 ## 3. Person 1: User Authentication & Operator Profile Subsystem
 
-### Detailed Problem Statement (PS 1)
-"Design, implement, and validate a secure, lightweight mission operator authentication and authorization backend service using Node.js, Express.js, and MongoDB. In multi-operator ground control environments, operational safety demands that every telemetry injection, command sequence, and configuration change be attributed to an authorized ground operator. The objective is to construct a persistent Mongoose data model (`User`) enforcing unique constraints on operator handles and institutional email addresses, build robust RESTful onboarding endpoints (`POST /api/auth/register`) that guard against identity collisions, establish a streamlined credential verification mechanism (`POST /api/auth/login`) returning standardized session tokens, and develop a protected identity inspection endpoint (`GET /api/auth/me`) that safely strips password hashes prior to payload delivery. The service must handle edge cases such as missing parameters, duplicate registrations, and invalid credentials with clean HTTP status codes and structured JSON error responses without introducing over-engineered external dependencies."
+### Formal Problem Statement (PS 1)
+"Design and implement a user authentication and session management feature within the application that enables mission operators to register, verify credentials, and log into the system using interactive forms with client-side and server-side validation. Upon submission, the system should validate the key credential format and authentication status, execute a request to verify the user against MongoDB, and dynamically render the operator profile and authorized dashboard view on the screen with proper error handling and status indicators."
 
 ### Subsystem Deliverables & Owned Code
 - `backend/models/User.js`: Persistent schema with validation constraints (`username`, `email`, `password`, `role`).
@@ -61,8 +61,8 @@ This document defines the formal division of the SomaiyaPod mission control back
 
 ## 4. Person 2: Telemetry Ingestion, Dynamic Routing & Analytics Subsystem
 
-### Detailed Problem Statement (PS 2)
-"Architect and implement an end-to-end RESTful spacecraft telemetry processing, dynamic routing, and statistical analytics engine using Express.js and Mongoose ODM. Real-time satellite operations require ground systems to ingest high-frequency downlink packets containing physical telemetry (battery level, operating temperatures, orbital altitude, velocity, cabin pressure, and RF signal quality) while empowering flight controllers to filter, inspect, and purge individual transmission events. The objective is to define a multi-sensor Mongoose schema with automated health threshold classification (marking transmissions as Nominal, Warning, or Critical based on live voltage and thermal thresholds), implement complete CRUD operations including dynamic URL parameter lookup (`GET /api/telemetry/:id`) and target document deletion (`DELETE /api/telemetry/:id`), calculate runtime analytical averages (`GET /api/telemetry/stats`) across active mission records using functional array reduction, and build a deterministic batch seeder (`POST /api/telemetry/seed`) using MongoDB bulk insertion to populate simulated flight histories during mission rehearsals."
+### Formal Problem Statement (PS 2)
+"Design and implement a telemetry data management and analytics feature within the application that enables flight operators to log, query, and purge spacecraft sensor records using an interactive telemetry control interface with client-side and server-side validation. Upon submission, the system should validate the sensor payload values and threshold status, execute requests to perform CRUD operations and compute statistical metrics on MongoDB collections, and dynamically render real-time telemetry tables, gauges, and health indicators on the screen with proper error handling and status indicators."
 
 ### Subsystem Deliverables & Owned Code
 - `backend/models/Telemetry.js`: Spacecraft telemetry schema with multi-sensor parameters and status tracking.
@@ -100,19 +100,21 @@ This document defines the formal division of the SomaiyaPod mission control back
 
 ## 5. Person 3: Core Server Infrastructure, Satellite Ingestion & Gemini AI Subsystem
 
-### Detailed Problem Statement (PS 3)
-"Configure and maintain the central Node.js/Express runtime infrastructure, manage scalable MongoDB lifecycle connectivity, and implement external API ingestion alongside generative artificial intelligence diagnostics for mission operations. Space ground stations depend on a resilient web application pipeline capable of cross-origin resource sharing (CORS), asynchronous JSON middleware parsing, and uninterrupted database persistence with automated local fallbacks. The objective is to engineer the central application server (`server.js`) with structured routing mounts and health telemetry (`/api/health`), develop the asynchronous database connector (`db.js`) supporting cloud and local connection strings, build an automated live orbital satellite data pipeline (`GET /api/external/fetch-and-save`) that pulls real-time ISS orbital coordinates from external REST endpoints with timeout guards and simulated trajectory fallbacks, and integrate the Google Gemini Generative AI SDK (`POST /api/ai/analyze` and `POST /api/ai/chat`) to perform automated anomaly detection and conversational flight briefing with graceful local heuristic fallback when API keys are not supplied."
+### Formal Problem Statement (PS 3)
+"Design and implement an API integration and artificial intelligence diagnostic feature within the application that enables users to connect external satellite tracking feeds and submit their Gemini AI API key using an interactive configuration form with client-side and server-side validation. Upon submission, the system should validate the key's format and authentication status, execute a request to fetch relevant orbital data from the target Web API or generate AI telemetry diagnostics, and dynamically render the retrieved orbital telemetry and flight briefings on the screen with proper error handling, timeout fallbacks, and status indicators."
 
 ### Subsystem Deliverables & Owned Code
-- `backend/server.js`: Master application entry point, middleware pipeline, route mounts, and server listener.
+- `backend/server.js`: Master application entry point, root route, middleware pipeline, route mounts, and server listener.
 - `backend/db.js`: Mongoose connection manager with lifecycle event handling and local failover.
 - `backend/routes/externalApi.js`: External satellite tracking API integration with network timeout and simulation fallback.
 - `backend/routes/ai.js`: Google Gemini Generative AI SDK integration with diagnostic prompts and local heuristic fallbacks.
+- `backend/vercel.json`: Serverless routing configuration for cloud deployments.
 - `backend/.env.example`: Configuration template for environment variables (`PORT`, `MONGO_URI`, `GEMINI_API_KEY`).
 
 ### Technical Architecture & Viva Walkthrough
 1. **Server Architecture & Middleware Pipeline (`server.js`)**:
    - Boots Express on configurable `process.env.PORT || 5000`.
+   - Mounts the root `GET /` endpoint returning API operational status and child route mappings.
    - Configures `cors()` middleware to enable secure cross-origin communication from the React frontend running on port 5173.
    - Mounts `express.json()` for parsing incoming application/json request payloads.
    - Exposes the `/api/health` diagnostic endpoint reporting server uptime and timestamp.
