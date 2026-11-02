@@ -68,12 +68,10 @@ function AIPredictor() {
   const [aiSource, setAiSource] = useState("");
   const [telemetryCount, setTelemetryCount] = useState(0);
 
-  // Chat state
   const [userQuestion, setUserQuestion] = useState("");
   const [chatAnswer, setChatAnswer] = useState("");
   const [isAsking, setIsAsking] = useState(false);
 
-  // 1. Call Gemini AI to analyze recent MongoDB telemetry
   const runGeminiAnalysis = async () => {
     setIsAnalyzing(true);
     try {
@@ -98,7 +96,6 @@ function AIPredictor() {
     }
   };
 
-  // 2. Chat with Gemini about pod telemetry
   const handleAskQuestion = async (e) => {
     e.preventDefault();
     if (!userQuestion.trim()) return;
@@ -148,8 +145,7 @@ function AIPredictor() {
           {isAnalyzing ? "Analyzing with Gemini..." : "Run Gemini Diagnostics"}
         </button>
       </div>
-
-      {/* Main Analysis Card */}
+      
       <div className="card" style={{ marginBottom: "24px" }}>
         <div className="flex-between" style={{ marginBottom: "14px", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px" }}>
           <div>
@@ -170,8 +166,7 @@ function AIPredictor() {
           <FormattedReport text={aiReport} />
         )}
       </div>
-
-      {/* Gemini Chat Question Section */}
+      
       <div className="card" style={{ marginTop: "20px" }}>
         <h3>Ask Gemini AI Flight Engineer</h3>
         <p className="form-subtitle" style={{ marginBottom: "14px" }}>
@@ -199,8 +194,7 @@ function AIPredictor() {
             </button>
           </div>
         </form>
-
-        {/* Quick Suggestion Chips */}
+        
         <div style={{ marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", alignSelf: "center" }}>Suggestions:</span>
           {[

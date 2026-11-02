@@ -5,7 +5,7 @@ Full-stack spacecraft mission control and telemetry monitoring workstation for S
 ## Tech Stack
 - **Frontend**: React 19, Vite, Vanilla CSS Design System (Scientific Workstation UI)
 - **Backend**: Node.js, Express.js, MongoDB (Mongoose)
-- **Intelligence**: Google Gemini AI (`gemini-3.8-flash`) with offline heuristic diagnostics
+- **Intelligence**: Google Gemini AI (`gemini-3-flash-preview`) with offline heuristic diagnostics
 - **External Feeds**: WhereTheISS.at Public Satellite API with orbital physics fallback
 
 ---

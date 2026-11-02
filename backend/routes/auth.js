@@ -1,9 +1,20 @@
 import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 const router = express.Router();
 
-// 1. Register User (Simple & direct)
+const signToken = (user) =>
+  jwt.sign({ id: user._id }, process.env.JWT_SECRET || "somaiyapod_dev_secret", { expiresIn: "7d" });
+
+const publicUser = (user) => ({
+  id: user._id,
+  username: user.username,
+  email: user.email,
+  role: user.role,
+});
+
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -12,33 +23,25 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
-    // Check if user already exists
-    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    const existing = await User.findOne({ $or: [{ email: email.toLowerCase() }, { username }] });
     if (existing) {
       return res.status(400).json({ success: false, message: "Username or Email already exists" });
     }
 
-    // Save directly to MongoDB
-    const user = new User({ username, email, password });
-    await user.save();
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await User.create({ username, email, password: hashed });
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully!",
-      token: "user_token_" + user._id,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
+      token: signToken(user),
+      user: publicUser(user),
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({ success: false, message: "Error registering user" });
   }
 });
 
-// 2. Login User (Simple username & password check)
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -47,33 +50,24 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ success: false, message: "Enter username and password" });
     }
 
-    // Find user with matching username/email and password
-    const user = await User.findOne({
-      $or: [{ username }, { email: username }],
-      password: password,
-    });
+    const user = await User.findOne({ $or: [{ username }, { email: username.toLowerCase() }] });
+    const valid = user && (await bcrypt.compare(password, user.password));
 
-    if (!user) {
+    if (!valid) {
       return res.status(401).json({ success: false, message: "Invalid username or password" });
     }
 
     return res.json({
       success: true,
       message: "Login successful!",
-      token: "user_token_" + user._id,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
+      token: signToken(user),
+      user: publicUser(user),
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({ success: false, message: "Error logging in" });
   }
 });
 
-// 3. Get Current User Profile
 router.get("/me", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -82,15 +76,15 @@ router.get("/me", async (req, res) => {
     }
 
     const token = authHeader.replace("Bearer ", "").trim();
-    const userId = token.replace("user_token_", "");
+    const { id } = jwt.verify(token, process.env.JWT_SECRET || "somaiyapod_dev_secret");
 
-    const user = await User.findById(userId).select("-password");
+    const user = await User.findById(id).select("-password");
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
     return res.json({ success: true, user });
-  } catch (error) {
+  } catch {
     return res.status(401).json({ success: false, message: "Invalid token" });
   }
 });

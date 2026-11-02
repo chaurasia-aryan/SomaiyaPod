@@ -1,8 +1,3 @@
-/* ==========================================================================
-   SOMAIYAPOD SCIENTIFIC TELEMETRY CONSOLE
-   Minimal, High-Density, Fast-Access Scientific Workstation
-   ========================================================================== */
-
 :root {
   --bg-app: #f8fafc;
   --bg-surface: #ffffff;
@@ -37,9 +32,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ==========================================================================
-   STATION HEADER & STATUS STRIP
-   ========================================================================== */
 .navbar {
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-light);
@@ -150,9 +142,6 @@ body {
   color: #ffffff;
 }
 
-/* ==========================================================================
-   APP SHELL
-   ========================================================================== */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -167,9 +156,6 @@ body {
   padding: 20px;
 }
 
-/* ==========================================================================
-   SCIENTIFIC RIBBON BAR (Instant Telemetry Context)
-   ========================================================================== */
 .telemetry-ribbon {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -215,7 +201,6 @@ body {
   gap: 8px;
 }
 
-/* Fast Action Buttons */
 .action-btn {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -253,9 +238,6 @@ body {
   cursor: not-allowed;
 }
 
-/* ==========================================================================
-   SCIENTIFIC INSTRUMENT GRID (6-Card Telemetry Matrix)
-   ========================================================================== */
 .telemetry-matrix {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -321,7 +303,6 @@ body {
   color: var(--text-muted);
 }
 
-/* Linear Gauge Bar */
 .mini-gauge {
   width: 100%;
   height: 4px;
@@ -336,9 +317,6 @@ body {
   background: var(--border-dark);
 }
 
-/* ==========================================================================
-   WORKSTATION PANELS (Cards, Tables, Tools)
-   ========================================================================== */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -372,7 +350,6 @@ body {
   align-items: center;
 }
 
-/* Notification Banner */
 .notification-banner {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -384,7 +361,6 @@ body {
   margin-bottom: 16px;
 }
 
-/* Fast Navigation Action Cards on Dashboard */
 .action-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -431,9 +407,6 @@ body {
   color: var(--border-dark);
 }
 
-/* ==========================================================================
-   SCIENTIFIC DATA TABLE (High Density)
-   ========================================================================== */
 .search-filter-bar {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -535,7 +508,6 @@ body {
   background: var(--bg-subtle);
 }
 
-/* Status Badges */
 .badge {
   display: inline-block;
   padding: 2px 6px;
@@ -589,9 +561,6 @@ body {
   border-color: #fca5a5;
 }
 
-/* ==========================================================================
-   INPUTS & FORMS
-   ========================================================================== */
 .form-group {
   margin-bottom: 14px;
 }
@@ -659,9 +628,6 @@ body {
   color: var(--text-muted);
 }
 
-/* ==========================================================================
-   CHARTS (Compact Scientific Graphs)
-   ========================================================================== */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
@@ -704,9 +670,6 @@ body {
   height: auto;
 }
 
-/* ==========================================================================
-   AI DIAGNOSTICS & CHAT
-   ========================================================================== */
 .ai-briefing-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
@@ -769,9 +732,6 @@ body {
   gap: 8px;
 }
 
-/* ==========================================================================
-   MISSION SPECIFICATIONS TABLE
-   ========================================================================== */
 .spec-table {
   display: flex;
   flex-direction: column;
@@ -832,4 +792,144 @@ body {
   .main-content {
     padding: 14px;
   }
+}
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px 16px;
+  background-color: var(--bg-app);
+  background-image:
+    linear-gradient(var(--border-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+.form-toggle-bar {
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  padding: 3px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+
+.toggle-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.toggle-tab:hover {
+  color: var(--text-main);
+}
+
+.toggle-tab.active {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.form-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-top: 3px solid var(--border-dark);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.form-card h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.form-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 22px;
+}
+
+.form-card .form-group input {
+  padding: 10px 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-card .form-group input:focus {
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+}
+
+.form-card .form-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+
+.primary-btn {
+  background: var(--border-dark);
+  color: #fff;
+  border: 1px solid var(--border-dark);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+.secondary-btn {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  border-color: var(--text-muted);
+}
+
+.primary-btn:active:not(:disabled),
+.secondary-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary-btn:focus-visible,
+.secondary-btn:focus-visible,
+.toggle-tab:focus-visible {
+  outline: 2px solid var(--border-dark);
+  outline-offset: 2px;
 }

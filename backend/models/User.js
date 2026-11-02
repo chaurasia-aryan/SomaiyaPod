@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Simple User Schema for Login & Registration
 const userSchema = new mongoose.Schema(
   {
     username: {

@@ -3,7 +3,6 @@ import Telemetry from "../models/Telemetry.js";
 
 const router = express.Router();
 
-// 1. GET ALL TELEMETRY (Read)
 router.get("/", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 100;
@@ -12,76 +11,33 @@ router.get("/", async (req, res) => {
       .limit(limit);
 
     return res.json({ success: true, count: records.length, data: records });
-  } catch (error) {
+  } catch {
     return res.status(500).json({ success: false, message: "Error fetching data" });
   }
 });
 
-// 2. GET SINGLE RECORD BY ID (Dynamic route: /:id)
-router.get("/:id", async (req, res) => {
-  try {
-    const record = await Telemetry.findById(req.params.id);
-    if (!record) {
-      return res.status(404).json({ success: false, message: "Record not found" });
-    }
-    return res.json({ success: true, data: record });
-  } catch (error) {
-    return res.status(400).json({ success: false, message: "Invalid ID" });
-  }
-});
-
-// 3. CREATE NEW TELEMETRY (Create)
-router.post("/", async (req, res) => {
-  try {
-    const { podId, battery, temperature, altitude, speed, status, source } = req.body;
-
-    let calcStatus = status || "Nominal";
-    if (battery < 25 || temperature > 60) {
-      calcStatus = "Critical";
-    } else if (battery < 50 || temperature > 40) {
-      calcStatus = "Warning";
-    }
-
-    const newRecord = new Telemetry({
-      podId: podId || "SomaiyaPod-01",
-      battery: Number(battery) || 85,
-      temperature: Number(temperature) || 24,
-      altitude: Number(altitude) || 500,
-      speed: Number(speed) || 27500,
-      status: calcStatus,
-      source: source || "Manual Entry",
-      timestamp: new Date(),
-    });
-
-    await newRecord.save();
-    return res.status(201).json({ success: true, message: "Saved successfully", data: newRecord });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: "Error saving record" });
-  }
-});
-
-// 4. GET STATS / AVERAGES
 router.get("/stats", async (req, res) => {
   try {
     const records = await Telemetry.find().sort({ timestamp: -1 }).limit(50);
     if (records.length === 0) {
       return res.json({
         success: true,
-        stats: { totalRecords: 0, avgBattery: 0, avgTemperature: 0, latestStatus: "Offline" },
+        stats: { totalRecords: 0, avgBattery: null, avgTemperature: null, latestStatus: "Offline" },
       });
     }
 
-    const total = records.length;
-    const avgBatt = (records.reduce((acc, r) => acc + r.battery, 0) / total).toFixed(1);
-    const avgTemp = (records.reduce((acc, r) => acc + r.temperature, 0) / total).toFixed(1);
+    const avg = (key) => {
+      const vals = records.map((r) => r[key]).filter((v) => typeof v === "number");
+      return vals.length ? Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1)) : null;
+    };
     const latest = records[0];
 
     return res.json({
       success: true,
       stats: {
-        totalRecords: total,
-        avgBattery: Number(avgBatt),
-        avgTemperature: Number(avgTemp),
+        totalRecords: records.length,
+        avgBattery: avg("battery"),
+        avgTemperature: avg("temperature"),
         latestStatus: latest.status,
         latestAltitude: latest.altitude,
         latestSpeed: latest.speed,
@@ -89,49 +45,59 @@ router.get("/stats", async (req, res) => {
         latestTemperature: latest.temperature,
       },
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({ success: false, message: "Error calculating stats" });
   }
 });
 
-// 5. SEED SAMPLE DATA (Insert 12 records)
-router.post("/seed", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    const sampleData = [];
-    const now = Date.now();
-
-    for (let i = 11; i >= 0; i--) {
-      const timeOffset = i * 5 * 60 * 1000;
-      const batt = Math.max(30, 95 - i * 3);
-      const temp = Number((22 + (11 - i) * 0.8).toFixed(1));
-      const alt = Number((500 + Math.sin(i / 2) * 15).toFixed(1));
-      const spd = Number((27500 + Math.cos(i) * 100).toFixed(0));
-
-      sampleData.push({
-        podId: "SomaiyaPod-01",
-        battery: batt,
-        temperature: temp,
-        altitude: alt,
-        speed: spd,
-        status: batt < 40 ? "Warning" : "Nominal",
-        source: "Seed Data",
-        timestamp: new Date(now - timeOffset),
-      });
+    const record = await Telemetry.findById(req.params.id);
+    if (!record) {
+      return res.status(404).json({ success: false, message: "Record not found" });
     }
-
-    await Telemetry.insertMany(sampleData);
-    return res.json({ success: true, message: "Seeded 12 records successfully" });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: "Error seeding data" });
+    return res.json({ success: true, data: record });
+  } catch {
+    return res.status(400).json({ success: false, message: "Invalid ID" });
   }
 });
 
-// 6. DELETE RECORD BY ID (Delete)
+router.post("/", async (req, res) => {
+  try {
+    const { podId, battery, temperature, altitude, speed, status, source } = req.body;
+
+    const toNum = (v) => (v === undefined || v === null || v === "" ? null : Number(v));
+    const nums = { battery: toNum(battery), temperature: toNum(temperature), altitude: toNum(altitude), speed: toNum(speed) };
+
+    if (nums.altitude === null || Object.values(nums).some((v) => v !== null && Number.isNaN(v))) {
+      return res.status(400).json({ success: false, message: "Altitude is required and all readings must be numbers." });
+    }
+
+    let calcStatus = ["Nominal", "Warning", "Critical"].includes(status) ? status : "Unknown";
+    if (nums.battery !== null && nums.battery < 25) calcStatus = "Critical";
+    else if (nums.temperature !== null && nums.temperature > 60) calcStatus = "Critical";
+    else if (nums.battery !== null && nums.battery < 50) calcStatus = "Warning";
+    else if (nums.temperature !== null && nums.temperature > 40) calcStatus = "Warning";
+
+    const newRecord = await Telemetry.create({
+      podId: podId || "SomaiyaPod-01",
+      ...nums,
+      status: calcStatus,
+      source: source || "Manual Entry",
+      timestamp: new Date(),
+    });
+
+    return res.status(201).json({ success: true, message: "Saved successfully", data: newRecord });
+  } catch {
+    return res.status(500).json({ success: false, message: "Error saving record" });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     await Telemetry.findByIdAndDelete(req.params.id);
     return res.json({ success: true, message: "Record deleted" });
-  } catch (error) {
+  } catch {
     return res.status(500).json({ success: false, message: "Error deleting record" });
   }
 });

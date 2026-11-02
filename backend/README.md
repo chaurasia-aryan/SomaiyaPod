@@ -114,7 +114,7 @@ Viva Questions & Answers:
 ### Person 3: AI Intelligence Engine & LLM Integration
 - Files Owned: `routes/ai.js`, `server.js` (Health endpoint), Frontend AI bridge (`src/AIPredictor.jsx`)
 - Core Topics:
-  1. Google Gemini SDK (`@google/generative-ai`) integration using `gemini-3.8-flash`.
+  1. Google Gemini SDK (`@google/generative-ai`) integration using `gemini-3-flash-preview`.
   2. Grounded prompt engineering: feeding recent MongoDB sensor readings into the LLM prompt.
   3. Autonomous local fallback engine (`generateLocalDiagnostics`) if API key is missing or quota is exhausted.
   4. Context-aware interactive flight chat endpoint (`/api/ai/chat`).

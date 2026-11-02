@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Real Backend Login Function connected to MongoDB
 async function loginUser(username, password) {
   const res = await fetch("/api/auth/login", {
     method: "POST",
@@ -10,7 +9,6 @@ async function loginUser(username, password) {
   return await res.json();
 }
 
-// Real Backend Registration Function connected to MongoDB
 async function registerUser(username, email, password) {
   const res = await fetch("/api/auth/register", {
     method: "POST",
@@ -40,7 +38,6 @@ function LoginForm({ onLoginSuccess, switchToRegister }) {
       const data = await loginUser(username.trim(), password);
 
       if (data.success) {
-        // Save token and user in localStorage
         localStorage.setItem("somaiya_token", data.token);
         localStorage.setItem("somaiya_user", JSON.stringify(data.user));
         onLoginSuccess(data.user);

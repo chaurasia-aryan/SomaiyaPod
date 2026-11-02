@@ -15,17 +15,16 @@ function App() {
   const [actionLoading, setActionLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
-  // Telemetry metrics from MongoDB
   const [metrics, setMetrics] = useState({
-    battery: 88,
-    temperature: 22.5,
-    altitude: 500,
-    speed: 27500,
-    status: "Nominal",
-    podId: "SomaiyaPod-01",
+    battery: null,
+    temperature: null,
+    altitude: null,
+    speed: null,
+    status: "No data",
+    podId: "-",
   });
+  const show = (v, unit = "") => (v === null || v === undefined ? "N/A" : `${v}${unit}`);
 
-  // Check if user was previously logged in
   useEffect(() => {
     const savedUser = localStorage.getItem("somaiya_user");
     const savedToken = localStorage.getItem("somaiya_token");
@@ -39,7 +38,6 @@ function App() {
     }
   }, []);
 
-  // Fetch latest telemetry reading from backend
   const refreshLatestTelemetry = async () => {
     try {
       const res = await fetch("/api/telemetry?limit=1");
@@ -55,8 +53,8 @@ function App() {
           podId: latest.podId,
         });
       }
-    } catch (err) {
-      console.error("Error fetching latest telemetry:", err);
+    } catch {
+      console.error("Error fetching latest telemetry");
     }
   };
 
@@ -66,7 +64,6 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fast action: Sync external live satellite API
   const handleSyncISS = async () => {
     setActionLoading(true);
     setStatusMessage("Querying live orbital tracking API...");
@@ -79,29 +76,8 @@ function App() {
       } else {
         setStatusMessage("Failed to ingest external satellite data.");
       }
-    } catch (err) {
+    } catch {
       setStatusMessage("Error communicating with satellite ingestion service.");
-    } finally {
-      setActionLoading(false);
-      setTimeout(() => setStatusMessage(""), 4000);
-    }
-  };
-
-  // Fast action: Seed sample flight telemetry
-  const handleSeedData = async () => {
-    setActionLoading(true);
-    setStatusMessage("Injecting flight telemetry sequence into MongoDB...");
-    try {
-      const res = await fetch("/api/telemetry/seed", { method: "POST" });
-      const result = await res.json();
-      if (result.success) {
-        setStatusMessage(`Telemetry seeded (${result.count} records inserted).`);
-        await refreshLatestTelemetry();
-      } else {
-        setStatusMessage("Failed to seed telemetry records.");
-      }
-    } catch (err) {
-      setStatusMessage("Error triggering telemetry seed endpoint.");
     } finally {
       setActionLoading(false);
       setTimeout(() => setStatusMessage(""), 4000);
@@ -150,34 +126,33 @@ function App() {
       default:
         return (
           <div className="dashboard-container">
-            {/* Mission Station Status Ribbon */}
+            
             <div className="telemetry-ribbon">
               <div className="ribbon-metrics">
                 <div className="ribbon-item">
                   <span className="ribbon-label">Target:</span>
-                  <span className="ribbon-val">{metrics.podId || "SomaiyaPod-01"}</span>
+                  <span className="ribbon-val">{metrics.podId}</span>
                 </div>
                 <div className="ribbon-item">
                   <span className="ribbon-label">Link Status:</span>
                   <span className="ribbon-val" style={{ color: metrics.status === "Nominal" ? "var(--status-nominal)" : "var(--status-warning)" }}>
-                    {metrics.status || "Nominal"}
+                    {metrics.status}
                   </span>
                 </div>
                 <div className="ribbon-item">
                   <span className="ribbon-label">Battery:</span>
-                  <span className="ribbon-val">{metrics.battery}%</span>
+                  <span className="ribbon-val">{show(metrics.battery, "%")}</span>
                 </div>
                 <div className="ribbon-item">
                   <span className="ribbon-label">Thermal:</span>
-                  <span className="ribbon-val">{metrics.temperature} C</span>
+                  <span className="ribbon-val">{show(metrics.temperature, " °C")}</span>
                 </div>
                 <div className="ribbon-item">
                   <span className="ribbon-label">Altitude:</span>
-                  <span className="ribbon-val">{metrics.altitude} km</span>
+                  <span className="ribbon-val">{show(metrics.altitude, " km")}</span>
                 </div>
               </div>
-
-              {/* Fast Action Buttons for Scientists */}
+              
               <div className="ribbon-controls">
                 <button
                   className="action-btn"
@@ -194,14 +169,6 @@ function App() {
                   title="Query live orbital API and save to database"
                 >
                   Sync ISS Tracker
-                </button>
-                <button
-                  className="action-btn btn-dark"
-                  onClick={handleSeedData}
-                  disabled={actionLoading}
-                  title="Seed 12 simulated flight packets"
-                >
-                  Seed Test Data
                 </button>
               </div>
             </div>
@@ -220,8 +187,7 @@ function App() {
                 </button>
               </div>
             )}
-
-            {/* Scientific Instrument Matrix (6-Card Telemetry Grid) */}
+            
             <div className="page-header" style={{ marginTop: "10px" }}>
               <h2>Active Telemetry Matrix</h2>
               <p className="subtitle">High-frequency sensor downlinks recorded in MongoDB</p>
@@ -234,7 +200,7 @@ function App() {
                   <span className="instrument-badge">LEO</span>
                 </div>
                 <div className="instrument-value" style={{ fontSize: "1.45rem" }}>
-                  {metrics.podId || "SomaiyaPod-01"}
+                  {metrics.podId}
                 </div>
                 <div className="instrument-subtext">Active Ground Tracking</div>
               </div>
@@ -247,7 +213,7 @@ function App() {
                   </span>
                 </div>
                 <div className="instrument-value">
-                  {metrics.status || "Nominal"}
+                  {metrics.status}
                 </div>
                 <div className="instrument-subtext">Automated Threshold Evaluation</div>
               </div>
@@ -258,13 +224,13 @@ function App() {
                   <span className="instrument-badge">Main Bus</span>
                 </div>
                 <div className="instrument-value">
-                  {metrics.battery}%
+                  {show(metrics.battery, "%")}
                 </div>
                 <div className="mini-gauge">
-                  <div className="mini-gauge-fill" style={{ width: `${Math.min(100, Math.max(0, metrics.battery))}%` }}></div>
+                  <div className="mini-gauge-fill" style={{ width: `${Math.min(100, Math.max(0, metrics.battery ?? 0))}%` }}></div>
                 </div>
                 <div className="instrument-subtext" style={{ marginTop: "6px" }}>
-                  {metrics.battery > 70 ? "Solar Cells Optimal" : "Low Power Reserve"}
+                  {metrics.battery === null ? "No battery sensor data" : metrics.battery > 70 ? "Power level good" : "Low power reserve"}
                 </div>
               </div>
 
@@ -274,9 +240,9 @@ function App() {
                   <span className="instrument-badge">Sensor T-1</span>
                 </div>
                 <div className="instrument-value">
-                  {metrics.temperature} C
+                  {show(metrics.temperature, " °C")}
                 </div>
-                <div className="instrument-subtext">Cooling Loop Nominal</div>
+                <div className="instrument-subtext">{metrics.temperature === null ? "No temperature sensor data" : "Latest sensor reading"}</div>
               </div>
 
               <div className="instrument-card">
@@ -301,8 +267,7 @@ function App() {
                 <div className="instrument-subtext">Orbital Ground Speed</div>
               </div>
             </div>
-
-            {/* Quick Scientific Modules Navigation Grid */}
+            
             <div className="page-header" style={{ marginTop: "24px" }}>
               <h2>Mission Control Subsystems</h2>
               <p className="subtitle">Direct navigation to ground station operations, analysis, and data layers</p>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-// Reusable Pure SVG Line / Area Chart component
 function SimpleLineChart({
   title,
   data,
@@ -13,7 +12,9 @@ function SimpleLineChart({
 }) {
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
-  if (!data || data.length === 0) {
+  const points = data ? [...data].reverse().filter((p) => typeof p[dataKey] === "number") : [];
+
+  if (points.length === 0) {
     return (
       <div className="card chart-card">
         <h3>{title}</h3>
@@ -22,15 +23,12 @@ function SimpleLineChart({
     );
   }
 
-  // Reverse so chronological order goes left to right
-  const points = [...data].reverse();
-  const values = points.map((p) => p[dataKey] ?? 0);
+  const values = points.map((p) => p[dataKey]);
 
   const calculatedMin = minVal !== undefined ? minVal : Math.floor(Math.min(...values) * 0.95);
   const calculatedMax = maxVal !== undefined ? maxVal : Math.ceil(Math.max(...values) * 1.05);
   const range = calculatedMax - calculatedMin || 1;
 
-  // Chart dimensions
   const width = 480;
   const height = 180;
   const paddingX = 40;
@@ -39,7 +37,6 @@ function SimpleLineChart({
   const innerWidth = width - paddingX * 2;
   const innerHeight = height - paddingY * 2;
 
-  // Calculate coordinates for each point
   const coords = points.map((p, index) => {
     const x = paddingX + (index / (points.length - 1 || 1)) * innerWidth;
     const y = paddingY + innerHeight - ((p[dataKey] - calculatedMin) / range) * innerHeight;
@@ -52,12 +49,10 @@ function SimpleLineChart({
     };
   });
 
-  // Construct SVG path string
   const pathD = coords.reduce((acc, pt, index) => {
     return index === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
   }, "");
 
-  // Area under curve
   const areaD = `${pathD} L ${coords[coords.length - 1].x} ${height - paddingY} L ${coords[0].x} ${height - paddingY} Z`;
 
   return (
@@ -75,7 +70,7 @@ function SimpleLineChart({
           className="responsive-svg"
           onMouseLeave={() => setHoveredPoint(null)}
         >
-          {/* Horizontal grid lines */}
+          
           <line
             x1={paddingX}
             y1={paddingY}
@@ -99,8 +94,7 @@ function SimpleLineChart({
             y2={height - paddingY}
             stroke="#cbd5e1"
           />
-
-          {/* Y Axis Labels */}
+          
           <text x={paddingX - 6} y={paddingY + 4} textAnchor="end" fontSize="10" fill="#94a3b8">
             {calculatedMax}
           </text>
@@ -110,14 +104,11 @@ function SimpleLineChart({
           <text x={paddingX - 6} y={height - paddingY + 4} textAnchor="end" fontSize="10" fill="#94a3b8">
             {calculatedMin}
           </text>
-
-          {/* Filled Area */}
+          
           <path d={areaD} fill={fillColor} />
-
-          {/* Stroke Line */}
+          
           <path d={pathD} fill="none" stroke={strokeColor} strokeWidth="2.5" />
-
-          {/* Interactive Data Point Circles */}
+          
           {coords.map((pt, idx) => (
             <circle
               key={idx}
@@ -132,8 +123,7 @@ function SimpleLineChart({
             />
           ))}
         </svg>
-
-        {/* Hover Tooltip Box */}
+        
         {hoveredPoint && (
           <div
             className="chart-tooltip"
@@ -170,14 +160,12 @@ function TelemetryCharts() {
   const fetchChartData = async () => {
     setLoading(true);
     try {
-      // Get recent 15 records
       const res = await fetch("/api/telemetry?limit=15");
       const json = await res.json();
       if (json.success) {
         setRecords(json.data);
       }
 
-      // Get stats
       const statsRes = await fetch("/api/telemetry/stats");
       const statsJson = await statsRes.json();
       if (statsJson.success) {
@@ -210,37 +198,35 @@ function TelemetryCharts() {
           </button>
         </div>
       </div>
-
-      {/* Quick Summary Cards */}
+      
       {stats && (
         <div className="card-grid" style={{ marginBottom: "24px" }}>
           <div className="card telemetry-card">
             <div className="card-title">Average Battery</div>
-            <div className="card-value">{stats.avgBattery || 88}%</div>
+            <div className="card-value">{stats.avgBattery === null ? "N/A" : `${stats.avgBattery}%`}</div>
             <div className="card-subtext green-text">Based on {stats.totalRecords} records</div>
           </div>
 
           <div className="card telemetry-card">
             <div className="card-title">Average Temp</div>
-            <div className="card-value">{stats.avgTemperature || 23.5} °C</div>
-            <div className="card-subtext green-text">Thermal stability nominal</div>
+            <div className="card-value">{stats.avgTemperature === null ? "N/A" : `${stats.avgTemperature} °C`}</div>
+            <div className="card-subtext">Average of recorded readings</div>
           </div>
 
           <div className="card telemetry-card">
             <div className="card-title">Latest Altitude</div>
-            <div className="card-value">{stats.latestAltitude || 500} km</div>
-            <div className="card-subtext">LEO orbital trajectory</div>
+            <div className="card-value">{stats.latestAltitude ?? "N/A"} km</div>
+            <div className="card-subtext">Latest record</div>
           </div>
 
           <div className="card telemetry-card">
             <div className="card-title">Orbital Velocity</div>
-            <div className="card-value">{stats.latestSpeed || 27500} km/h</div>
-            <div className="card-subtext">Ground pass velocity</div>
+            <div className="card-value">{stats.latestSpeed ?? "N/A"} km/h</div>
+            <div className="card-subtext">Latest record</div>
           </div>
         </div>
       )}
-
-      {/* Charts Grid */}
+      
       <div className="charts-grid">
         <SimpleLineChart
           title="Battery Power (%) Curve"

@@ -8,14 +8,12 @@ function DataTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Form state for adding custom record
   const [newBattery, setNewBattery] = useState(85);
   const [newTemp, setNewTemp] = useState(24.5);
   const [newAltitude, setNewAltitude] = useState(500);
   const [newSpeed, setNewSpeed] = useState(27500);
   const [newStatus, setNewStatus] = useState("Nominal");
 
-  // Fetch telemetry records from backend MongoDB
   const fetchTelemetryData = async () => {
     setLoading(true);
     try {
@@ -35,7 +33,6 @@ function DataTab() {
     fetchTelemetryData();
   }, []);
 
-  // 1. Fetch live data from API and save directly to MongoDB
   const handleFetchFromLiveAPI = async () => {
     setLoading(true);
     setActionMessage("Connecting to external satellite API & saving to MongoDB...");
@@ -44,7 +41,6 @@ function DataTab() {
       const data = await res.json();
       if (data.success) {
         setActionMessage(data.message);
-        // Refresh the list to include the newly saved record
         fetchTelemetryData();
       } else {
         setActionMessage("Failed to fetch live API data.");
@@ -58,26 +54,6 @@ function DataTab() {
     }
   };
 
-  // 2. Seed 12 sample telemetry data points
-  const handleSeedData = async () => {
-    setLoading(true);
-    setActionMessage("Generating 12 realistic telemetry points in MongoDB...");
-    try {
-      const res = await fetch("/api/telemetry/seed", { method: "POST" });
-      const data = await res.json();
-      if (data.success) {
-        setActionMessage(data.message);
-        fetchTelemetryData();
-      }
-    } catch (err) {
-      console.error("Seed error:", err);
-    } finally {
-      setLoading(false);
-      setTimeout(() => setActionMessage(""), 5000);
-    }
-  };
-
-  // 3. Delete a record from MongoDB
   const handleDeleteRecord = async (id) => {
     try {
       const res = await fetch(`/api/telemetry/${id}`, { method: "DELETE" });
@@ -90,7 +66,6 @@ function DataTab() {
     }
   };
 
-  // 4. Submit manual telemetry record
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -119,7 +94,6 @@ function DataTab() {
     }
   };
 
-  // Filtering records
   const filteredList = telemetryList.filter((item) => {
     const matchesStatus =
       statusFilter === "ALL" ||
@@ -150,13 +124,6 @@ function DataTab() {
           </button>
           <button
             className="secondary-btn"
-            onClick={handleSeedData}
-            disabled={loading}
-          >
-            Seed Sample Data
-          </button>
-          <button
-            className="secondary-btn"
             onClick={() => setShowAddForm(!showAddForm)}
           >
             {showAddForm ? "Close Form" : "Add Custom Data"}
@@ -176,8 +143,7 @@ function DataTab() {
           <span>{actionMessage}</span>
         </div>
       )}
-
-      {/* Add Telemetry Form */}
+      
       {showAddForm && (
         <div className="card" style={{ marginBottom: "20px" }}>
           <h3>Add Manual Telemetry Entry to MongoDB</h3>
@@ -247,8 +213,7 @@ function DataTab() {
           </form>
         </div>
       )}
-
-      {/* Filter and Search Bar */}
+      
       <div className="card search-filter-bar" style={{ marginBottom: "16px" }}>
         <div className="flex-between">
           <div className="search-box">
@@ -277,8 +242,7 @@ function DataTab() {
           </div>
         </div>
       </div>
-
-      {/* Data Table */}
+      
       <div className="card table-card">
         <div className="flex-between" style={{ marginBottom: "12px" }}>
           <span style={{ fontWeight: 600, color: "var(--text-subtle)" }}>
@@ -335,18 +299,18 @@ function DataTab() {
                       <td>
                         <span
                           className={
-                            item.battery < 40
+                            item.battery !== null && item.battery < 40
                               ? "warning-text"
                               : "green-text"
                           }
                           style={{ fontWeight: 600 }}
                         >
-                          {item.battery}%
+                          {item.battery === null ? "N/A" : `${item.battery}%`}
                         </span>
                       </td>
-                      <td>{item.temperature} °C</td>
+                      <td>{item.temperature === null ? "N/A" : `${item.temperature} °C`}</td>
                       <td>{item.altitude} km</td>
-                      <td>{item.speed ? `${item.speed} km/h` : "N/A"}</td>
+                      <td>{item.speed === null ? "N/A" : `${item.speed} km/h`}</td>
                       <td>
                         <span
                           className={`badge ${

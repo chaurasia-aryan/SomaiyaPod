@@ -203,7 +203,7 @@ Modern mission control centers require two external integrations: real-world orb
    - Enforces a 6-second timeout limit using `AbortSignal.timeout(6000)`.
    - Implements a resilient `catch` block that seamlessly generates mathematically consistent orbital trajectory data if the external API times out or is offline, persisting the result to MongoDB.
 4. **Google Gemini AI Telemetry Diagnostics (`routes/ai.js`)**:
-   - Integrates the official `@google/generative-ai` package using the `gemini-3.8-flash` model.
+   - Integrates the official `@google/generative-ai` package using the `gemini-3-flash-preview` model.
    - `POST /api/ai/analyze`: Queries the latest 5 telemetry documents from MongoDB, formats them into a structured prompt, and requests Gemini to evaluate operational anomalies and flight recommendations.
    - Includes a deterministic rule-based fallback report if no API key is provided, preventing server crashes during offline vivas.
    - `POST /api/ai/chat`: Interactive conversational engineering assistant providing answers grounded in live telemetry context.
@@ -241,9 +241,9 @@ Modern mission control centers require two external integrations: real-world orb
   ```json
   {
     "success": true,
-    "source": "Google Gemini 3.8 Flash",
-    "recordsAnalyzed": 5,
-    "report": "### Mission Telemetry Briefing\n- Battery Bus: Nominal at 84%...\n- Thermal Loop: Equilibrium at 23.5 C...\n- Recommendation: Maintain nominal attitude."
+    "source": "Google Gemini 3 Flash",
+    "dataCount": 5,
+    "analysis": "### Mission Telemetry Briefing\n- Battery Bus: Nominal at 84%...\n- Thermal Loop: Equilibrium at 23.5 C...\n- Recommendation: Maintain nominal attitude."
   }
   ```
 
